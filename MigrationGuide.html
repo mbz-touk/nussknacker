@@ -442,10 +442,49 @@
 <code>asyncExecutionConfig.parallelismMultiplier</code> has been deprecated and should be replaced with <code>asyncExecutionConfig.workers</code>.
 8 should be sane default value.</li>
 <li><a href="https://github.com/TouK/nussknacker/pull/722" target="_blank">#722</a> Old way of configuring <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> and <a href="GLOSSARY.html#model" class="glossary-term" title="Model describes your processes, includes data structures, and nodes definitions.  ">model</a> (via <code>flinkConfig</code> and <code>processConfig</code>) is removed.
-<code>processTypes</code>  configuration should be used from now on.</li>
-<li><a href="https://github.com/TouK/nussknacker/pull/763" target="_blank">#763</a> Some API traits (ProcessManager, DictRegistry DictQueryService, CountsReporter) 
-  now extend <code>java.lang.AutoCloseable</code>.</li>
-<li>Old way or additional properties configuration should be replaced by the new one, which is now mapped to <code>Map[String, AdditionalPropertyConfig]</code></li>
+<code>processTypes</code> configuration should be used from now on. Example:<pre><code>  flinkConfig {...}
+  processConfig {...}
+</code></pre>  becomes:<pre><code>  processTypes {
+    &quot;type e.g. streaming&quot; {
+      engineConfig { 
+        type: &quot;flinkStreaming&quot;
+        PUT HERE PROPERTIES OF flinkConfig FROM OLD CONFIG 
+      }
+      modelConfig {
+        classPath: PUT HERE VALUE OF flinkConfig.classPath FROM OLD CONFIG
+        PUT HERE PROPERTIES OF processConfig FROM OLD CONFIG
+      }
+    }
+  }
+</code></pre></li>
+<li><a href="https://github.com/TouK/nussknacker/pull/763" target="_blank">#763</a> Some API traits (ProcessManager, DictRegistry DictQueryService, CountsReporter) now extend <code>java.lang.AutoCloseable</code>.</li>
+<li>Old way of additional properties configuration should be replaced by the new one, which is now mapped to <code>Map[String, AdditionalPropertyConfig]</code>. Example in your config:<pre><code>  additionalFieldsConfig: {
+    mySelectProperty {
+      label: &quot;Description&quot;
+      type: &quot;select&quot;
+      isRequired: false
+      values: [&quot;true&quot;, &quot;false&quot;]
+    }
+  }
+</code></pre>  becomes:<pre><code>  additionalPropertiesConfig {
+    mySelectProperty {
+      label: &quot;Description&quot;
+      defaultValue: &quot;false&quot;
+      editor: {
+        type: &quot;FixedValuesParameterEditor&quot;,
+        possibleValues: [
+          {&quot;label&quot;: &quot;Yes&quot;, &quot;expression&quot;: &quot;true&quot;},
+          {&quot;label&quot;: &quot;No&quot;, &quot;expression&quot;: &quot;false&quot;}
+        ]
+      }
+    }
+  }
+</code></pre></li>
+<li><a href="https://github.com/TouK/nussknacker/pull/588" target="_blank">#588</a> <a href="https://github.com/TouK/nussknacker/pull/882" target="_blank">#882</a> <code>FlinkSource</code> API changed, current implementation is now <code>BasicFlinkSource</code></li>
+<li><a href="https://github.com/TouK/nussknacker/pull/839" target="_blank">#839</a> <a href="https://github.com/TouK/nussknacker/pull/882" target="_blank">#882</a> <code>FlinkSink</code> API changed, current implementation is now <code>BasicFlinkSink</code></li>
+<li><a href="https://github.com/TouK/nussknacker/pull/841" target="_blank">#841</a> <code>ProcessConfigCreator</code> API changed; note that currently all process objects are invoked with <code>ProcessObjectDependencies</code> as a parameter. The APIs of <code>KafkaSinkFactory</code>, <code>KafkaSourceFactory</code>, and all their implementations were changed. <code>Config</code> is available as property of <code>ProcessObjectDependencies</code> instance.</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/863" target="_blank">#863</a> <code>restUrl</code> in <code>engineConfig</code> need to be preceded with protocol. Host with port only is not allowed anymore.</li>
+<li>Rename <code>grafanaSettings</code> to <code>metricsSettings</code> in configuration.</li>
 </ul>
 <h2 id="in-version-0012">In version 0.0.12</h2>
 <ul>
@@ -509,7 +548,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Migration guide","level":"4.7","depth":1,"next":{"title":"Glossary","level":"4.8","depth":1,"path":"GLOSSARY.md","ref":"GLOSSARY.md","articles":[]},"previous":{"title":"Changelog","level":"4.6","depth":1,"path":"Changelog.md","ref":"Changelog.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"MigrationGuide.md","mtime":"2020-03-27T08:00:13.974Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-03-27T08:12:05.004Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Migration guide","level":"4.7","depth":1,"next":{"title":"Glossary","level":"4.8","depth":1,"path":"GLOSSARY.md","ref":"GLOSSARY.md","articles":[]},"previous":{"title":"Changelog","level":"4.6","depth":1,"path":"Changelog.md","ref":"Changelog.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"MigrationGuide.md","mtime":"2020-04-30T09:58:14.237Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-04-30T10:11:46.372Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
