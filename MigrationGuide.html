@@ -436,6 +436,21 @@
                                 
                                 <h1 id="migration-guide">Migration guide</h1>
 <p>To see biggest differences please consult the <a href="Changelog.html">changelog</a>.</p>
+<h2 id="in-version-011">In version 0.1.1</h2>
+<ul>
+<li><a href="https://github.com/TouK/nussknacker/pull/930" target="_blank">#930</a> <code>DeeplyCheckingExceptionExtractor</code> was moved from <code>nussknacker-flink-util</code>
+module to <code>nussknacker-util</code> module.</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/919" target="_blank">#919</a> <code>KafkaSource</code> constructor now doesn&apos;t take <code>consumerGroup</code>. Instead of this
+it computes <code>consumerGroup</code> on their own based on <code>kafka.consumerGroupNamingStrategy</code> in <code>modelConfig</code> (default set to <code>processId</code>).
+You can also override it by <code>overriddenConsumerGroup</code> optional parameter.
+Regards to this changes, <code>KafkaConfig</code> has new, optional parameter <code>consumerGroupNamingStrategy</code>.</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/920" target="_blank">#920</a> <code>KafkaSource</code> constructor now takes <code>KafkaConfig</code> instead of using one
+that was parsed by <code>BaseKafkaSourceFactory.kafkaConfig</code>. Also if you parse Typesafe Config to <code>KafkaSource</code> on your own, now you should
+use dedicated method <code>KafkaConfig.parseConfig</code> to avoid further problems when parsing strategy will be changed.</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/914" target="_blank">#914</a> <code>pl.touk.nussknacker.engine.api.definition.Parameter</code> has deprecated
+main factory method with <code>runtimeClass</code> parameter. Now should be passed <code>isLazyParameter</code> instead. Also were removed <code>runtimeClass</code>
+from variances of factory methods prepared for easy testing (<code>optional</code> method and so on).</li>
+</ul>
 <h2 id="in-version-010">In version 0.1.0</h2>
 <ul>
 <li><a href="https://github.com/TouK/nussknacker/pull/755" target="_blank">#755</a> Default async execution context does not depend on parallelism.
@@ -548,7 +563,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Migration guide","level":"4.7","depth":1,"next":{"title":"Glossary","level":"4.8","depth":1,"path":"GLOSSARY.md","ref":"GLOSSARY.md","articles":[]},"previous":{"title":"Changelog","level":"4.6","depth":1,"path":"Changelog.md","ref":"Changelog.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"MigrationGuide.md","mtime":"2020-04-30T10:13:12.124Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-04-30T10:28:00.854Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Migration guide","level":"4.7","depth":1,"next":{"title":"Glossary","level":"4.8","depth":1,"path":"GLOSSARY.md","ref":"GLOSSARY.md","articles":[]},"previous":{"title":"Changelog","level":"4.6","depth":1,"path":"Changelog.md","ref":"Changelog.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"MigrationGuide.md","mtime":"2020-05-14T07:13:09.722Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-05-14T07:13:54.899Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

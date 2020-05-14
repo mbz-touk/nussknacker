@@ -439,6 +439,13 @@
 under active development, so some parts of the API may change in the future.</p>
 <p>For detailed instructions how to migrate to the newest version please see <a href="MigrationGuide.html">migration guide</a>.</p>
 <h1 id="nussknacker-versions">Nussknacker versions</h1>
+<h2 id="011">0.1.1</h2>
+<ul>
+<li>Branch parameters now can be eager (computed during process compilation)</li>
+<li>More restrictive type checking in SpEL - mainly added verification of types of method&apos;s paramaters</li>
+<li>Added support for Kafka consumer group strategies - setted up by <code>kafka.consumerGroupNamingStrategy</code> configuraton option</li>
+<li>Bugfixes for joins</li>
+</ul>
 <h2 id="010">0.1.0</h2>
 <ul>
 <li>Added support for explicitly setting uids in operators - turned on by <code>explicitUidInStatefulOperators</code> <a href="GLOSSARY.html#model" class="glossary-term" title="Model describes your processes, includes data structures, and nodes definitions.  ">model</a>&apos;s flag.
@@ -616,7 +623,7 @@ configuration should be used from now on.</li>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Changelog","level":"4.6","depth":1,"next":{"title":"Migration guide","level":"4.7","depth":1,"path":"MigrationGuide.md","ref":"MigrationGuide.md","articles":[]},"previous":{"title":"Roadmap","level":"4.5","depth":1,"path":"Roadmap.md","ref":"Roadmap.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Changelog.md","mtime":"2020-04-30T10:13:12.124Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-04-30T10:28:00.854Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Changelog","level":"4.6","depth":1,"next":{"title":"Migration guide","level":"4.7","depth":1,"path":"MigrationGuide.md","ref":"MigrationGuide.md","articles":[]},"previous":{"title":"Roadmap","level":"4.5","depth":1,"path":"Roadmap.md","ref":"Roadmap.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Changelog.md","mtime":"2020-05-14T07:13:09.722Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-05-14T07:13:54.899Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
