@@ -458,15 +458,22 @@ is defined by &apos;Output&apos; parameter, it&apos;s value is: </p>
 <p>Currently branches are identified by id of last node in this branch before union.</p>
 <h2 id="aggregate">Aggregate</h2>
 <p><img src="../img/aggregate_window.png" alt="aggregate_window"></p>
-<p>This element defines generic aggregation of values in time window of given length. Parameters are:</p>
+<p>This element defines generic aggregation of values in sliding time window of given length. Parameters are:</p>
 <ul>
 <li>keyBy - expression defining key for which we compute aggregate, e.g. <code>#input.userId</code></li>
 <li>aggregator - type of aggregation (see below)</li>
 <li>aggregateBy - value which will be aggregated (e.g. <code>#input.callDuration</code>, <code>#input.productId</code>)</li>
-<li>windowLengthInSeconds - length of time window</li>
+<li>windowLength - length of time window</li>
 </ul>
-<p>For each event additional variable will be added. For example, 
-for aggregate node with length of 10 minutes and aggregation max, following events will be emitted:</p>
+<p>For each event additional variable will be added. For example: for aggregate node with length of 10 minutes, aggregation max and input events:</p>
+<ul>
+<li><code>{userId: 1, callDuration: 1, hour: 10:10}</code></li>
+<li><code>{userId: 1, callDuration: 5, hour: 10:10}</code></li>
+<li><code>{userId: 2, callDuration: 4, hour: 10:15}</code></li>
+<li><code>{userId: 1, callDuration: 4, hour: 10:15}</code></li>
+<li><code>{userId: 1, callDuration: 3, hour: 10:23}</code></li>
+</ul>
+<p>Following events will be emitted:</p>
 <ul>
 <li><code>{userId: 1, callDuration: 1, hour: 10:10, aggregate: 1}</code> - first event</li>
 <li><code>{userId: 1, callDuration: 5, hour: 10:10, aggregate: 5}</code> - higher duration</li>
@@ -479,8 +486,17 @@ for aggregate node with length of 10 minutes and aggregation max, following even
 <ul>
 <li>Max - computes maximal value</li>
 <li>Min - computes minimal value</li>
+<li>Sum - computes sum of values</li>
 <li>Set - the result is set of incoming elements (can be v. ineffective for large sets, try to use ApproximateSetCardinality in this case )</li>
 <li>ApproximateSetCardinality - computes approximate cardinality of set using <a href="https://en.wikipedia.org/wiki/HyperLogLog" target="_blank">HyperLogLog</a> algorithm.</li>
+</ul>
+<h2 id="aggregatetumbling">AggregateTumbling</h2>
+<p>This aggregation in contrary to Aggregate uses tumbling window. All parameters are the same.
+For example, for aggregate-tumbling node with length of 10 minutes, aggregation max and input events from previous example, will be emitted output events:</p>
+<ul>
+<li><code>{userId: 1, callDuration: 5, hour: 10:20, aggregate: 5}</code> - highest duration during first ten minutes for userId: 1</li>
+<li><code>{userId: 2, callDuration: 4, hour: 10:20, aggregate: 4}</code> - highest duration during first ten minutes for userId: 2</li>
+<li><code>{userId: 1, callDuration: 3, hour: 10:30, aggregate: 4}</code> - highest duration during second ten minutes for userId: 1</li>
 </ul>
 <h2 id="previousvalue">PreviousValue</h2>
 <p><img src="../img/previous_value_window.png" alt="previous_value_window"></p>
@@ -539,7 +555,7 @@ then the value of output variable is the previous location for current user. If 
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Flink custom transformers","level":"2.3.3","depth":2,"next":{"title":"Configuration","level":"2.4","depth":1,"path":"Configuration.md","ref":"Configuration.md","articles":[]},"previous":{"title":"Subprocesses","level":"2.3.2","depth":2,"path":"designingProcesses/Subprocesses.md","ref":"designingProcesses/Subprocesses.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"designingProcesses/FlinkCustomTransformers.md","mtime":"2020-05-15T15:48:10.156Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-05-15T15:48:51.272Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Flink custom transformers","level":"2.3.3","depth":2,"next":{"title":"Configuration","level":"2.4","depth":1,"path":"Configuration.md","ref":"Configuration.md","articles":[]},"previous":{"title":"Subprocesses","level":"2.3.2","depth":2,"path":"designingProcesses/Subprocesses.md","ref":"designingProcesses/Subprocesses.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"designingProcesses/FlinkCustomTransformers.md","mtime":"2020-05-15T19:31:45.927Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-05-15T19:32:32.811Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
