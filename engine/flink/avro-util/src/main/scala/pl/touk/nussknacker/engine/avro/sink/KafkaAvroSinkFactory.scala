@@ -65,7 +65,7 @@ class KafkaAvroSinkFactory(val schemaRegistryProvider: SchemaRegistryProvider, v
     List(topic, versionParam(Nil)) ++ paramsDeterminedAfterSchema
   }
 
-  override def implementation(params: Map[String, Any], dependencies: List[NodeDependencyValue]): FlinkSink = {
+  override def implementation(params: Map[String, Any], dependencies: List[NodeDependencyValue], finalState: Option[State]): FlinkSink = {
     val preparedTopic = extractPreparedTopic(params)
     val versionOption = extractVersionOption(params)
     val key = params(KafkaAvroBaseTransformer.SinkKeyParamName).asInstanceOf[LazyParameter[CharSequence]]
