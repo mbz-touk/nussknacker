@@ -14,6 +14,8 @@ import scala.concurrent.duration._
 
 trait AuthenticationConfiguration {
   def authorizeUrl: Option[URI] = Option.empty
+  def publicKey: Option[String] = Option.empty
+  def validateNonce: Boolean = true
   def method: AuthenticationMethod
   def usersFile: String
 
@@ -60,11 +62,10 @@ object AuthenticationConfiguration {
                         globalPermissions: List[GlobalPermission] = List.empty)
 }
 
-case class DefaultAuthenticationConfiguration(method: AuthenticationMethod = AuthenticationMethod.Other, usersFile: String,
-                                              cachingHashes: Option[CachingHashesConfig]) extends AuthenticationConfiguration {
+case class DefaultAuthenticationConfiguration(method: AuthenticationMethod = AuthenticationMethod.Other,
+                                              usersFile: String, cachingHashes: Option[CachingHashesConfig]) extends AuthenticationConfiguration {
 
   def cachingHashesOrDefault: CachingHashesConfig = cachingHashes.getOrElse(CachingHashesConfig.defaultConfig)
-
 }
 
 object DefaultAuthenticationConfiguration {

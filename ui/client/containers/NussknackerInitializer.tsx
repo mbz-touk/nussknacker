@@ -8,6 +8,8 @@ import {connect} from "react-redux"
 import {RouteComponentProps} from "react-router"
 import {withRouter} from "react-router-dom"
 import {compose} from "redux"
+import {nanoid} from "nanoid"
+import * as jwt from "jsonwebtoken"
 import ActionsUtils, {EspActionsProps} from "../actions/ActionsUtils"
 import api from "../api"
 import SystemUtils from "../common/SystemUtils"
@@ -39,7 +41,8 @@ class NussknackerInitializer extends React.Component<Props, State> {
   public static ACCESS_TOKEN_CODE = 1024
 
   redirectToAuthorizeUrl = () => {
-    window.location.replace(this.props.authenticationSettings.authorizeUrl)
+    window.localStorage.setItem("nonce", nanoid())
+    window.location.replace(`${this.props.authenticationSettings.authorizeUrl  }&nonce=${  window.localStorage.getItem("nonce")}`)
   }
 
   state = {
@@ -113,7 +116,7 @@ class NussknackerInitializer extends React.Component<Props, State> {
     // Automatically redirect user when he is not authenticated and backend is OAUTH2
     api.interceptors.response.use(response => response, (error) => {
       if (_.get(error, "response.status") === NussknackerInitializer.HTTP_UNAUTHORIZED_CODE && settings.backend === NussknackerInitializer.OAUTH2_BACKEND) {
-        window.location.replace(settings.authorizeUrl)
+        this.redirectToAuthorizeUrl()
       }
 
       return Promise.reject(error)
@@ -132,8 +135,19 @@ class NussknackerInitializer extends React.Component<Props, State> {
       })
     }
 
+    const queryHashParams = queryString.parse(this.props.history.location.hash)
+    if (settings.backend === NussknackerInitializer.OAUTH2_BACKEND && settings.publicKey && queryHashParams.id_token && queryHashParams.access_token) {
+      if (jwt.verify(queryHashParams.id_token, settings.publicKey, {nonce: window.localStorage.getItem("nonce")})) {
+        SystemUtils.setAuthorizationToken(queryHashParams.access_token)
+        this.props.history.replace({hash: null})
+      } else {
+        this.setState({error: this.state.errors[NussknackerInitializer.ACCESS_TOKEN_CODE]})
+        return Promise.reject()
+      }
+    }
+
     if (settings.backend === NussknackerInitializer.OAUTH2_BACKEND && !SystemUtils.hasAccessToken()) {
-      window.location.replace(settings.authorizeUrl)
+      this.redirectToAuthorizeUrl()
       return Promise.reject()
     } else if (settings.backend !== NussknackerInitializer.OAUTH2_BACKEND && SystemUtils.hasAccessToken()) {
       SystemUtils.clearAuthorizationToken()

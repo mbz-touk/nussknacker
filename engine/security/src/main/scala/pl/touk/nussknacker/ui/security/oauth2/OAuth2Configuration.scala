@@ -1,10 +1,13 @@
 package pl.touk.nussknacker.ui.security.oauth2
 
+import java.io.{File, FileInputStream}
 import java.net.URI
 
+import org.apache.commons.io.IOUtils
 import com.typesafe.config.Config
 import pl.touk.nussknacker.ui.security.api.AuthenticationConfiguration
 import pl.touk.nussknacker.ui.security.api.AuthenticationMethod.AuthenticationMethod
+
 
 case class OAuth2Configuration(method: AuthenticationMethod,
                                usersFile: String,
@@ -14,6 +17,8 @@ case class OAuth2Configuration(method: AuthenticationMethod,
                                profileUri: URI,
                                accessTokenUri: URI,
                                redirectUri: URI,
+                               publicKeyFile: Option[String],
+                               validateNonceOpt: Option[Boolean],
                                accessTokenParams: Map[String, String] = Map.empty,
                                authorizeParams: Map[String, String] = Map.empty,
                                headers: Map[String, String] = Map.empty,
@@ -30,6 +35,16 @@ case class OAuth2Configuration(method: AuthenticationMethod,
   })
 
   def redirectUrl: String = redirectUri.toString
+
+  override def publicKey: Option[String] = {
+    publicKeyFile.map(x => {
+      val a = IOUtils.toString(new FileInputStream(new File(x)), "UTF-8")
+      println(a)
+      a
+    })
+  }
+
+  override def validateNonce: Boolean = validateNonceOpt.getOrElse(super.validateNonce)
 }
 
 object OAuth2Configuration {

@@ -36,7 +36,9 @@ class SettingsResources(config: FeatureTogglesConfig,
 
           val authenticationSettings = AuthenticationSettings(
             authenticationConfig.method.toString,
-            authenticationConfig.authorizeUrl.map(_.toString)
+            authenticationConfig.authorizeUrl.map(_.toString),
+            authenticationConfig.publicKey,
+            authenticationConfig.validateNonce
           )
 
           val analyticsSettings = analyticsConfig.map(a => AnalyticsSettings(a.engine.toString, a.url.toString, a.siteId))
@@ -73,7 +75,7 @@ class SettingsResources(config: FeatureTogglesConfig,
 
 @JsonCodec case class AnalyticsSettings(engine: String, url: String, siteId: String)
 
-@JsonCodec case class AuthenticationSettings(backend: String, authorizeUrl: Option[String])
+@JsonCodec case class AuthenticationSettings(backend: String, authorizeUrl: Option[String], publicKey: Option[String], validateNonce: Boolean)
 
 @JsonCodec case class ProcessStateSettings(icons: Map[String, Map[String, String]], tooltips: Map[String, Map[String, String]])
 
