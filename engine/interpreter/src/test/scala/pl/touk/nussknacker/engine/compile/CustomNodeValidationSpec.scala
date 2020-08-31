@@ -25,7 +25,6 @@ import pl.touk.nussknacker.engine.{api, spel}
 import scala.collection.Set
 import scala.concurrent.Future
 
-
 class CustomNodeValidationSpec extends FunSuite with Matchers with OptionValues {
 
   import spel.Implicits._
