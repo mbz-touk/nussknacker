@@ -126,7 +126,7 @@ class CustomNodeValidationSpec extends FunSuite with Matchers with OptionValues 
   object UnionTransformer extends CustomStreamTransformer {
 
     @MethodToInvoke
-    def execute(@BranchParamName("key") keyByBranchId: Map[String, LazyParameter[_]], // key is only for runtime purpose
+    def execute(@BranchParamName("key") keyByBranchId: Map[String, LazyParameter[CharSequence]], // key is only for runtime purpose
                 @BranchParamName("value") valueByBranchId: Map[String, LazyParameter[_]],
                 @OutputVariableName variableName: String): JoinContextTransformation = {
       ContextTransformation
@@ -512,6 +512,31 @@ class CustomNodeValidationSpec extends FunSuite with Matchers with OptionValues 
       ),
       "stringService" -> Map("stringParam" -> SpelExpressionTypingInfo(Map(PositionRange(0, 5) -> Typed[String])))
     )
+  }
+
+  test("validation of types of branch parameters") {
+    val process =
+      EspProcess(MetaData("proc1", StreamMetaData()), ExceptionHandlerRef(List()), NonEmptyList.of(
+        GraphBuilder
+          .source("sourceId1", "mySource")
+          .branchEnd("branch1", "join1"),
+        GraphBuilder
+          .source("sourceId2", "mySource")
+          .branchEnd("branch2", "join1"),
+        GraphBuilder
+          .branch("join1", "unionTransformer", Some("outPutVar"),
+            List(
+              "branch1" -> List("key" -> "'key1'", "value" -> "'ala'"),
+              "branch2" -> List("key" -> "123", "value" -> "123")
+            )
+          )
+          .processorEnd("stringService", "stringService" , "stringParam" -> "'123'")
+      ))
+
+    val validationResult = validator.validate(process)
+    validationResult.result should matchPattern {
+      case Invalid(NonEmptyList(ExpressionParseError("Bad expression type, expected: CharSequence, found: Integer", "join1" , Some("key for branch branch2"), "123"), Nil)) =>
+    }
   }
 
   test("process with enricher") {
