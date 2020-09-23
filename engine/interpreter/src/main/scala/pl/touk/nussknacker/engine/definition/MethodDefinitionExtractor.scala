@@ -74,7 +74,7 @@ private[definition] trait AbstractMethodDefinitionExtractor[T] extends MethodDef
         val (paramType, isScalaOptionParameter, isJavaOptionalParameter) = determineOptionalParameter(paramTypeWithUnwrappedLazy)
         val extractedEditor = EditorExtractor.extract(p)
         val validators = tryToDetermineValidators(p, paramType, isScalaOptionParameter, isJavaOptionalParameter, extractedEditor)
-        Parameter(name, paramType, extractedEditor, validators, additionalVariables(p), branchParamName.isDefined,
+        Parameter(name, paramType, extractedEditor, validators, additionalVariables(p), Set.empty, branchParamName.isDefined,
           isLazyParameter = isLazyParameter, scalaOptionParameter = isScalaOptionParameter, javaOptionalParameter = isJavaOptionalParameter)
       }
     }.toList

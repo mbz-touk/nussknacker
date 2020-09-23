@@ -140,6 +140,7 @@ object UIProcessObjectsFactory {
       editor = ParameterEditorDeterminerChain(parameter, paramConfig).determineEditor(),
       validators = ParameterValidatorsDeterminerChain(paramConfig).determineValidators(parameter),
       additionalVariables = parameter.additionalVariables,
+      variablesToHide = parameter.variablesToHide,
       branchParam = parameter.branchParam
     )
   }
