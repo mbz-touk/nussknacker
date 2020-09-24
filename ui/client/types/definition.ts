@@ -15,6 +15,7 @@ export type UIParameter = {
      editor: $TodoType,
      validators: $TodoType,
      additionalVariables: Record<string, TypingResult>,
+     variablesToHide: Array<string>,
      branchParam: boolean,
 }
 
