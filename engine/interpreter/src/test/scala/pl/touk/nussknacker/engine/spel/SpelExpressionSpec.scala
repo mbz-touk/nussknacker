@@ -291,7 +291,7 @@ class SpelExpressionSpec extends FunSuite with Matchers with EitherValues {
 
     val ctxWithTypedMap = ctx.withVariable("map", TypedMap(Map.empty))
     val parseResult = parseOrFail[Integer]("#map.foo", validationCtx)
-    a[SpelExpressionEvaluationException] should be thrownBy {
+    a[Exception] should be thrownBy {
       parseResult.evaluateSyncToValue[Integer](ctxWithTypedMap)
     }
   }
