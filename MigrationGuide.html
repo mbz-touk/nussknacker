@@ -436,6 +436,43 @@
                                 
                                 <h1 id="migration-guide">Migration guide</h1>
 <p>To see biggest differences please consult the <a href="Changelog.html">changelog</a>.</p>
+<h2 id="in-version-030">In version 0.3.0</h2>
+<ul>
+<li><a href="https://github.com/TouK/nussknacker/pull/1313" target="_blank">#1313</a> Kafka Avro API passes <code>KafkaConfig</code> during <code>TypeInformation</code> determining</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1305" target="_blank">#1305</a> Kafka Avro API passes <code>RuntimeSchemaData</code> instead of <code>Schema</code> in various places</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1304" target="_blank">#1304</a> <code>SerializerWithSpecifiedClass</code> was moved to <code>flink-api</code> module.</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1044" target="_blank">#1044</a> Upgrade to <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> 1.11. Current watermark/timestamp mechanisms are deprectated in <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> 1.11, 
+new API <code>TimestampWatermarkHandler</code> is introduced, with <code>LegacyTimestampWatermarkHandler</code> as wrapper for previous mechanisms.</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1244" target="_blank">#1244</a> <code>Parameter</code> has new parameter &apos;variablesToHide&apos; with <code>Set</code> of variable names
+that will be hidden before parameter&apos;s evaluation</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1159" target="_blank">#1159</a> <a href="https://github.com/TouK/nussknacker/pull/1170" target="_blank">#1170</a> Changes in <code>GenericNodeTransformation</code> API:<ul>
+<li>Now <code>implementation</code> takes additional parameter with final state value determined during <code>contextTransformation</code></li>
+<li><code>DefinedLazyParameter</code> and <code>DefinedEagerParameter</code> holds <code>expression: TypedExpression</code> instead of <code>returnType: TypingResult</code></li>
+<li><code>DefinedLazyBranchParameter</code> and <code>DefinedEagerBranchParameter</code> holds <code>expressionByBranchId: Map[String, TypedExpression]</code> instead of <code>returnTypeByBranchId: Map[String, TypingResult]</code></li>
+</ul>
+</li>
+<li><p><a href="https://github.com/TouK/nussknacker/pull/1083" target="_blank">#1083</a></p>
+<ul>
+<li>Now <code>SimpleSlidingAggregateTransformerV2</code> and <code>SlidingAggregateTransformer</code> is deprecated in favour of <code>SlidingAggregateTransformerV2</code></li>
+<li>Now <code>SimpleTumblingAggregateTransformer</code> is deprecated in favour of <code>TumblingAggregateTransformer</code></li>
+<li>Now <code>SumAggregator</code>, <code>MaxAggregator</code> and <code>MinAggregator</code> doesn&apos;t change type of aggregated value (previously was changed to Double)</li>
+<li>Now <code>SumAggregator</code>, <code>MaxAggregator</code> and <code>MinAggregator</code> return null instead of <code>0D</code>/<code>Double.MaxValue</code>/<code>Double.MinValue</code> for case when there was no element added before <code>getResult</code></li>
+</ul>
+</li>
+<li><p><a href="https://github.com/TouK/nussknacker/pull/1149" target="_blank">#1149</a> FlinkProcessRegistrar refactor (can affect test code) </p>
+</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1166" target="_blank">#1166</a> <code>model.conf</code> should be renamed to <code>defaultModelConfig.conf</code></li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1218" target="_blank">#1218</a> FlinkProcessManager is no longer bundled in ui uber-jar. In docker/tgz distribution</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1255" target="_blank">#1255</a> Moved displaying <code>Metrics tab</code> to <code>customTabs</code></li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1257" target="_blank">#1257</a> Improvements: <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> test util package<ul>
+<li>Added methods: <code>cancelJob</code>, <code>submitJob</code>, <code>listJobs</code>, <code>runningJobs</code> to <code>FlinkMiniClusterHolder</code></li>
+<li>Deprecated: <code>runningJobs</code>, from <code>MiniClusterExecutionEnvironment</code></li>
+<li>Removed: <code>getClusterClient</code> from <code>FlinkMiniClusterHolder</code> interface, because of <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">flink</a> compatibility at <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> 1.9 </li>
+<li>Renamed: <code>FlinkStreamingProcessRegistrar</code> to <code>FlinkProcessManager</code> </li>
+</ul>
+</li>
+<li><a href="https://github.com/TouK/nussknacker/pull/1303" target="_blank">#1303</a> TypedObjectTypingResult has a new field: additionalInfo</li>
+</ul>
 <h2 id="in-version-020">In version 0.2.0</h2>
 <ul>
 <li><a href="https://github.com/TouK/nussknacker/pull/1104" target="_blank">#1104</a> Creation of <code>FlinkMiniCluster</code> is now extracted from <code>StoppableExecutionEnvironment</code>. You should create it using e.g.:<pre><code>val flinkMiniClusterHolder = FlinkMiniClusterHolder(FlinkTestConfiguration.configuration(parallelism))
@@ -673,7 +710,7 @@ from variances of factory methods prepared for easy testing (<code>optional</cod
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Migration guide","level":"4.7","depth":1,"next":{"title":"Glossary","level":"4.8","depth":1,"path":"GLOSSARY.md","ref":"GLOSSARY.md","articles":[]},"previous":{"title":"Changelog","level":"4.6","depth":1,"path":"Changelog.md","ref":"Changelog.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"MigrationGuide.md","mtime":"2020-09-03T09:14:10.715Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-09-03T09:15:02.287Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Migration guide","level":"4.7","depth":1,"next":{"title":"Glossary","level":"4.8","depth":1,"path":"GLOSSARY.md","ref":"GLOSSARY.md","articles":[]},"previous":{"title":"Changelog","level":"4.6","depth":1,"path":"Changelog.md","ref":"Changelog.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"MigrationGuide.md","mtime":"2020-11-17T06:26:45.522Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-11-17T06:27:35.018Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

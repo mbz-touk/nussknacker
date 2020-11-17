@@ -455,7 +455,7 @@
 <li><a href="http://localhost:8081/" target="_blank">Nussknacker</a> - user/password: admin/admin</li>
 <li><a href="http://localhost:8081/flink/" target="_blank">Apache Flink UI</a></li>
 <li><a href="http://localhost:8081/grafana/" target="_blank">Grafana</a></li>
-<li><a href="http://localhost:8081/kibana/" target="_blank">Kibana</a></li>
+<li><a href="http://localhost:8081/akhq/" target="_blank">AKHQ</a></li>
 </ul>
 <h2 id="defining-a-new-process">Defining a new process</h2>
 <ul>
@@ -465,7 +465,7 @@
 <li>Click &apos;Import&apos; on right panel and upload &apos;testData/DetectLargeTransactions.json&apos;</li>
 </ul>
 <blockquote>
-<p>This process reads transactions data from Kafka, filter only those with amount greater than some value and writes filtered events back to Kafka. These events are than read by <a href="GLOSSARY.html#logstash" class="glossary-term" title="Logstash is an open source, server-side data processing pipeline that ingests data from a multitude of sources simultaneously, transforms it, and then sends it to your favorite &quot;stash&quot;. See https://www.elastic.co/products/logstash">Logstash</a> and send to <a href="GLOSSARY.html#elasticsearch" class="glossary-term" title="Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected. See https://www.elastic.co/products/elasticsearch">Elasticsearch</a> for further analytics</p>
+<p>This process reads transactions data from Kafka, filter only those with amount greater than some value and writes filtered events back to Kafka. These events are than read by Logstash and send to Elasticsearch for further analytics</p>
 </blockquote>
 <ul>
 <li>Double click on nodes to see process logic</li>
@@ -497,27 +497,10 @@
   <source src="img/quickstart/deployAndMetrics.mp4" type="video/mp4">
 </video>
 
-<h2 id="see-results-in-kibana">See results in Kibana</h2>
+<h2 id="see-results-in-akhq">See results in AKHQ</h2>
 <ul>
-<li>Go to Search tab on Nussknacker main panel </li>
-<li>Define processedevents* as default index pattern</li>
-<li>Now you should see filtered events</li>
+<li>Go to <a href="http://localhost:8081/akhq/ui/nussknacker/topic/processedEvents/data" target="_blank">http://localhost:8081/akhq/ui/nussknacker/topic/processedEvents/data</a> - you should see processed events</li>
 </ul>
-<blockquote>
-<p>If you are getting 403 creating index, please try following script in the <a href="GLOSSARY.html#kibana" class="glossary-term" title="Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack, so you can do anything from learning why you&apos;re getting paged at 2:00 a.m. to understanding the impact rain might have on your quarterly numbers. See https://www.elastic.co/products/kibana">Kibana</a> &quot;Dev Tools&quot;
-<code>PUT .kibana/_settings
- {
-   &quot;index&quot;: {
-     &quot;blocks&quot;: {
-     &quot;read_only_allow_delete&quot;: &quot;false&quot;
-     }
-   }
- }</code></p>
-</blockquote>
-<video width="100%" controls>
-  <source src="img/quickstart/searchInKibana.mp4" type="video/mp4">
-</video>
-
 <h2 id="test-your-process-in-a-sandbox">Test your process in a sandbox</h2>
 <ul>
 <li>Clink &apos;generate&apos; button in right panel of application</li>
@@ -537,7 +520,7 @@
 <ul>
 <li>Drag &amp; drop <code>clientService</code> from <code>Creator panel</code> -&gt; <code>enrichers</code> -&gt; <code>clientService</code></li>
 <li>Double click on new node, fill some node <code>Id</code>, set <code>clientId</code> to <code>#input.clientId</code> and set <code>Output</code> variable name as <code>clientData</code>. Now you can access enriched data from <code>clientData</code> variable in further processing.</li>
-<li>Let&apos;s use enriched data in <code>save to elastic</code> node, set <code>Expression</code> to <code>#UTIL.mapAsJson({&apos;clientId&apos;: #input.clientId, cardNumber: #clientData.cardNumber})</code></li>
+<li>Let&apos;s use enriched data in <code>save to kafka</code> node, set <code>Expression</code> to <code>#UTIL.mapAsJson({&apos;clientId&apos;: #input.clientId, cardNumber: #clientData.cardNumber})</code></li>
 <li>Now run test on generated data to see if it works!</li>
 </ul>
 <video width="100%" controls>
@@ -560,12 +543,7 @@
 <li>Monitoring<ul>
 <li>InfluxDB</li>
 <li>Grafana</li>
-</ul>
-</li>
-<li>Data analysis  <ul>
-<li><a href="GLOSSARY.html#logstash" class="glossary-term" title="Logstash is an open source, server-side data processing pipeline that ingests data from a multitude of sources simultaneously, transforms it, and then sends it to your favorite &quot;stash&quot;. See https://www.elastic.co/products/logstash">Logstash</a></li>
-<li><a href="GLOSSARY.html#elasticsearch" class="glossary-term" title="Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected. See https://www.elastic.co/products/elasticsearch">Elasticsearch</a></li>
-<li><a href="GLOSSARY.html#kibana" class="glossary-term" title="Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack, so you can do anything from learning why you&apos;re getting paged at 2:00 a.m. to understanding the impact rain might have on your quarterly numbers. See https://www.elastic.co/products/kibana">Kibana</a></li>
+<li>AKHQ</li>
 </ul>
 </li>
 <li>Nginx<ul>
@@ -632,7 +610,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Quickstart","level":"2.1","depth":1,"next":{"title":"UI Manual","level":"2.2","depth":1,"path":"UI.md","ref":"UI.md","articles":[]},"previous":{"title":"Why Nussknacker","level":"1.2","depth":1,"path":"Why.md","ref":"Why.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Quickstart.md","mtime":"2020-09-03T09:14:10.715Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-09-03T09:15:02.287Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Quickstart","level":"2.1","depth":1,"next":{"title":"UI Manual","level":"2.2","depth":1,"path":"UI.md","ref":"UI.md","articles":[]},"previous":{"title":"Why Nussknacker","level":"1.2","depth":1,"path":"Why.md","ref":"Why.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Quickstart.md","mtime":"2020-11-17T06:26:45.522Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-11-17T06:27:35.018Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

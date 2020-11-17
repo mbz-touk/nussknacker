@@ -456,6 +456,9 @@ is defined by &apos;Output&apos; parameter, it&apos;s value is: </p>
 }
 </code></pre>
 <p>Currently branches are identified by id of last node in this branch before union.</p>
+<h2 id="unionmemo">UnionMemo</h2>
+<p>Works exactly like Union, but also memoize values for each branches. Memoized state will be cleared when there was no
+subsequent events from any branch during <code>stateTimeout</code>. Produced object has values from all branches.</p>
 <h2 id="aggregatesliding">AggregateSliding</h2>
 <p><img src="../img/aggregate_window.png" alt="aggregate_window"></p>
 <p>This element defines generic aggregation of values in sliding time window of given length. Parameters are:</p>
@@ -464,8 +467,9 @@ is defined by &apos;Output&apos; parameter, it&apos;s value is: </p>
 <li>aggregator - type of aggregation (see below)</li>
 <li>aggregateBy - value which will be aggregated (e.g. <code>#input.callDuration</code>, <code>#input.productId</code>)</li>
 <li>windowLength - length of time window, window will cover range: (exclusive) now-windowLength, (inclusive) now</li>
+<li>emitWhenEventLeft - determine, if should be emitted aggregated value also when some event left the slide</li>
 </ul>
-<p>For each event additional variable will be added. For example: for aggregate-sliding node with length of 10 minutes, aggregation max and input events:</p>
+<p>For each event additional variable will be added. For example: for aggregate-sliding node with length of 10 minutes, aggregation max, emitWhenEventLeft = false and input events:</p>
 <ul>
 <li><code>{userId: 1, callDuration: 1, hour: 10:10}</code></li>
 <li><code>{userId: 1, callDuration: 5, hour: 10:10}</code></li>
@@ -484,16 +488,20 @@ is defined by &apos;Output&apos; parameter, it&apos;s value is: </p>
 <h3 id="aggregator-types">Aggregator types</h3>
 <p>Currently we support following aggregations:</p>
 <ul>
-<li>Max - computes maximal value</li>
+<li>First - computes first value</li>
+<li>Last - computes last value</li>
 <li>Min - computes minimal value</li>
+<li>Max - computes maximal value</li>
 <li>Sum - computes sum of values</li>
+<li>List - the result is list of incoming elements</li>
 <li>Set - the result is set of incoming elements (can be v. ineffective for large sets, try to use ApproximateSetCardinality in this case )</li>
 <li>ApproximateSetCardinality - computes approximate cardinality of set using <a href="https://en.wikipedia.org/wiki/HyperLogLog" target="_blank">HyperLogLog</a> algorithm.</li>
 </ul>
 <h2 id="aggregatetumbling">AggregateTumbling</h2>
-<p>This aggregation in contrary to Aggregate uses tumbling window. All parameters are the same.
-For example, for aggregate-tumbling node with length of 10 minutes, aggregation max and input events from previous example, will be emitted output events:</p>
+<p>This aggregation in contrary to Aggregate uses tumbling window. All parameters are the same except that emitWhenEventLeft is replaced with:</p>
 <ul>
+<li>emitExtraWindowWhenNoData - determine, if should be emitted extra &quot;zero&quot;, aggregated value when there was no data in subsequent window for some key
+Example, for aggregate-tumbling node with length of 10 minutes, aggregation max, emitExtraWindowWhenNoData = false, and input events from previous example:</li>
 <li><code>{userId: 1, callDuration: 5, hour: 10:20, aggregate: 5}</code> - highest duration during first ten minutes for userId: 1</li>
 <li><code>{userId: 2, callDuration: 4, hour: 10:20, aggregate: 4}</code> - highest duration during first ten minutes for userId: 2</li>
 <li><code>{userId: 1, callDuration: 3, hour: 10:30, aggregate: 4}</code> - highest duration during second ten minutes for userId: 1</li>
@@ -568,7 +576,7 @@ And common parameters not dependent from branch:</li>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Flink custom transformers","level":"2.3.3","depth":2,"next":{"title":"Configuration","level":"2.4","depth":1,"path":"Configuration.md","ref":"Configuration.md","articles":[]},"previous":{"title":"Subprocesses","level":"2.3.2","depth":2,"path":"designingProcesses/Subprocesses.md","ref":"designingProcesses/Subprocesses.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"designingProcesses/FlinkCustomTransformers.md","mtime":"2020-09-03T09:14:10.715Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-09-03T09:15:02.287Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Flink custom transformers","level":"2.3.3","depth":2,"next":{"title":"Configuration","level":"2.4","depth":1,"path":"Configuration.md","ref":"Configuration.md","articles":[]},"previous":{"title":"Subprocesses","level":"2.3.2","depth":2,"path":"designingProcesses/Subprocesses.md","ref":"designingProcesses/Subprocesses.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"designingProcesses/FlinkCustomTransformers.md","mtime":"2020-11-17T06:26:45.526Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-11-17T06:27:35.018Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

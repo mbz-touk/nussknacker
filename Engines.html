@@ -434,11 +434,36 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="points-of-integration-with-apache-flink">Points of integration with Apache Flink</h1>
-<p>Nussknacker can be seen as a GUI for creating Apache <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> jobs. In this section we show how different <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a> concepts can be used (or how are they mapped) in Nussknacker.</p>
-<h2 id="handling-state">Handling state</h2>
-<h2 id="checkpoints-restarting">Checkpoints, restarting</h2>
-<h2 id="handling-time">Handling time</h2>
+                                <h1 id="engines">Engines</h1>
+<p>Nussknacker was created as GUI for <a href="GLOSSARY.html#flink" class="glossary-term" title="Apache Flink&#xAE; is an open-source stream processing framework for distributed, high-performing, always-available, and accurate data streaming applications. See https://flink.apache.org/">Flink</a>. However, it&apos;s also possible to use it to connect to other runtimes. 
+<code>ProcessManager</code> and <code>ProcessManagerProvider</code> interfaces were created to facilitate this. 
+In particular, we provide experimental standalone engine, which allows using Nussknacker as method of creating REST APIs</p>
+<p>To create/customize Nussknacker engine you have to:</p>
+<ul>
+<li>Implement <code>ProcessManagerProvider</code> interface and register it with ServiceLoader mechanism. 
+  Each provider should have unique <code>name</code>.</li>
+<li>Put implementation with all needed libraries on Nussknacker classpath. </li>
+<li>Configure appropriate <a href="GLOSSARY.html#model" class="glossary-term" title="Model describes your processes, includes data structures, and nodes definitions.  ">model</a> to use your process manager.</li>
+</ul>
+<p>To configure process category to use particular engine, see following configuration:</p>
+<pre><code>    processTypes {
+      &quot;streaming&quot;: {
+        type: ... //name of engine, e.g. &quot;flinkStreaming&quot;
+        //... - additional engine config (e.g. location of Flink cluster, etc.)
+        modelConfig: {
+          //model configuration
+          classPath: [...]
+
+        }
+      }
+    }
+</code></pre><h1 id="flink">Flink</h1>
+<p>Main processing engine for Nussknacker. It&apos;s published in <code>nussknacker-flink-manager</code> module.
+Name of engine is <code>flinkStreaming</code></p>
+<h1 id="standalone">Standalone</h1>
+<p>This engine is considered <strong>experimental</strong>. It allows to use Nussknacker to expose REST APIs or use it as
+embedded rules engine. We provide simplistic implementation of process manager in <code>nussknacker-standalone-app</code>
+module. Name of engine is <code>requestResponseStandalone</code> </p>
 
                                 
                                 </section>
@@ -482,7 +507,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Engines","level":"3.2","depth":1,"next":{"title":"API","level":"3.3","depth":1,"path":"API.md","ref":"API.md","articles":[]},"previous":{"title":"Architecture","level":"3.1","depth":1,"path":"Architecture.md","ref":"Architecture.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Engines.md","mtime":"2020-09-03T09:14:10.715Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-09-03T09:15:02.287Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Engines","level":"3.2","depth":1,"next":{"title":"API","level":"3.3","depth":1,"path":"API.md","ref":"API.md","articles":[]},"previous":{"title":"Architecture","level":"3.1","depth":1,"path":"Architecture.md","ref":"Architecture.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Engines.md","mtime":"2020-11-17T06:26:45.522Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-11-17T06:27:35.018Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

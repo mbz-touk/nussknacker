@@ -504,6 +504,54 @@ To avoid this overhead you can configure cashing of hashes using configuration:<
 }
 </code></pre><p>This workaround causes that passwords are kept in the memory and it will introduce risk that someone with access to content of heap will see cached passwords.</p>
 <h2 id="oauth2-security-module">OAuth2 security module</h2>
+<h3 id="generic-configuration">Generic configuration</h3>
+<pre><code>authentication: {
+  method: ${?AUTHENTICATION_METHOD} (default: &quot;BasicAuth&quot;)
+  clientSecret: ${?OAUTH2_CLIENT_SECRET}
+  clientId: ${?OAUTH2_CLIENT_ID}
+  authorizeUri: ${?OAUTH2_AUTHORIZE_URI}
+  redirectUri: ${?OAUTH2_REDIRECT_URI}
+  accessTokenUri: ${?OAUTH2_ACCESS_TOKEN_URI}
+  profileUri: ${?OAUTH2_PROFILE_URI}
+  profileFormat: ${?OAUTH2_PROFILE_FORMAT}
+  implicitGrantEnabled: ${?OAUTH2_IMPLICIT_GRANT_ENABLED}
+  jwt {
+    enabled: ${?OAUTH2_JWT_ENABLED} (default: false)
+    publicKey: ${?OAUTH2_JWT_AUTH_SERVER_PUBLIC_KEY}
+    publicKeyFile: ${?OAUTH2_JWT_AUTH_SERVER_PUBLIC_KEY_FILE}
+    certificate: ${?OAUTH2_JWT_AUTH_SERVER_CERTIFICATE}
+    certificateFile: ${?OAUTH2_JWT_AUTH_SERVER_CERTIFICATE_FILE}
+    idTokenNonceVerificationRequired: ${?OAUTH2_JWT_ID_TOKEN_NONCE_VERIFICATION_REQUIRED}
+  }
+  accessTokenParams {
+    grant_type: ${?OAUTH2_GRANT_TYPE}
+  }
+  accessTokenRequestContentType: &quot;application/json&quot; (default)
+  authorizeParams {
+    response_type: ${?OAUTH2_RESPONSE_TYPE}
+    scope: ${?OAUTH2_SCOPE}
+    audience: ${?OAUTH2_AUDIENCE}
+  }
+  headers {
+    Accept: ${?AUTHENTICATION_HEADERS_ACCEPT}
+  }
+  usersFile: ${?AUTHENTICATION_USERS_FILE}
+}
+</code></pre><p>When <code>method</code> is set to <code>OAuth2</code>, the following fields are mandatory: <code>clientSecret</code>, <code>clientId</code>, <code>authorizeUri</code>, <code>redirectUri</code>, <code>accessTokenUri</code>, <code>profileUri</code>, <code>profileFormat</code>, <code>implicitGrantEnabled</code>, <code>usersFile</code>.</p>
+<p>Subconfigs <code>accessTokenParams</code>, <code>accessTokenRequestContentType</code>, <code>authorizeParams</code>, <code>headers</code> are optional and every field from any of the subconfigs is optional and could be provided separately.</p>
+<p>By default access token request is sent using <code>application/json</code> content type, to use change it (eg. to <code>application/x-www-form-urlencoded</code>) use <code>accessTokenRequestContentType</code> config.</p>
+<p>Subconfig <code>jwt</code> is also optional. However, if it is present and <code>enabled</code> is set to true, <code>idTokenNonceVerificationRequired</code> and one of the <code>publicKey</code>, <code>publicKeyFile</code>, <code>certificate</code>, <code>certificateFile</code> fields have to be provided.</p>
+<h4 id="remarks">Remarks:</h4>
+<ul>
+<li>Setting <code>jwt.idTokenNonceVerificationRequired</code> to <code>true</code> has an effect only if <code>implicitGrantEnabled</code> is also set to <code>true</code>.</li>
+<li><p>For security reasons, if implicit flow used, <code>implicitGrantEnabled</code> and <code>jwt.idTokenNonceVerificationRequired</code> should be set to <code>true</code>.
+Furthermore <code>authorizeParams.response_type</code> should be set to <code>&quot;access_token id_token&quot;</code> (not only <code>&quot;access_token&quot;</code>).
+Then a received <code>access_token</code> format has to be JWT (like <code>id_token</code>).</p>
+<p><em>Of course, this does not apply when <code>authorizeParams.response_type</code> is set to <code>code</code> (code flow used).</em></p>
+</li>
+<li>Provided <code>jwt</code> is enabled, the backend first checks whether a user profile can be obtained from the <code>access_token</code>, secondly it tries to obtain the profile from a request sent to <code>authorizeUri</code>.</li>
+</ul>
+<h3 id="oauth2-security-module---github-example-with-code-flow">OAuth2 security module - GitHub example with code flow</h3>
 <h4 id="configuration-in-following-format">Configuration in following format:</h4>
 <pre><code>authentication: {
   method: &quot;OAuth2&quot;
@@ -513,16 +561,17 @@ To avoid this overhead you can configure cashing of hashes using configuration:<
   redirectUri: &quot;http://localhost:3000&quot;
   accessTokenUri: &quot;https://github.com/login/oauth/access_token&quot;
   profileUri: &quot;https://api.github.com/user&quot;
-  accessTokenParams: {
+  profileFormat: &quot;github&quot;
+  implicitGrantEnabled: false
+  accessTokenParams {
     grant_type: &quot;authorization_code&quot;
   }
-  headers: {
+  headers {
     Accept: &quot;application/json&quot;
   }
-  authorizeParams: {
+  authorizeParams {
     response_type: &quot;code&quot;
   }
-
   usersFile: &quot;./src/test/resources/oauth2-users.conf&quot;
 }
 </code></pre><h4 id="users-file-in-following-format">Users file in following format:</h4>
@@ -544,17 +593,49 @@ rules: [
     categories: [&quot;Defautl&quot;, &quot;FraudDetection&quot;]
   }
 ]
-</code></pre><h4 id="implementation-own-oauth2servicefactory">Implementation own OAuth2ServiceFactory</h4>
+</code></pre><h3 id="oauth2-security-module---auth0-example-with-implicit-flow">OAuth2 security module - Auth0 example with implicit flow</h3>
+<h4 id="auth0-application-configuration">Auth0 application configuration</h4>
+<ul>
+<li>&quot;Application Type&quot; should be set to &quot;Regular Web Application&quot;</li>
+<li>&quot;Use Auth0 instead of the IdP to do Single Sign On&quot; should be enabled.</li>
+<li>&quot;Allowed Callback URLs&quot; should contain <code>redirectUri</code>.</li>
+<li>&quot;Implicit&quot; should be added to &quot;Grant Types&quot; in &quot;Advanced Settings&quot;.</li>
+</ul>
+<p>More at <a href="https://auth0.com/docs/get-started/dashboard/application-settings" target="_blank">https://auth0.com/docs/get-started/dashboard/application-settings</a>.</p>
+<h4 id="configuration-in-following-format">Configuration in following format:</h4>
+<pre><code>authentication: {
+  method: &quot;OAuth2&quot;
+  clientSecret: &quot;&quot;
+  clientId: &quot;&quot;
+  authorizeUri: &quot;https://&lt;your-domain&gt;.auth0.com/authorize&quot;
+  redirectUri: &quot;http://localhost:3000&quot;
+  accessTokenUri: &quot;https://&lt;your-auth0-domain&gt;.auth0.com/oauth/token&quot;
+  profileUri: &quot;https://&lt;your-auth0-domain&gt;.auth0.com/userinfo&quot;
+  profileFormat: &quot;auth0&quot;
+  implicitGrantEnabled: true
+  jwt {
+    certificateFile: &quot;./etc/cert.pem&quot;
+    idTokenNonceVerificationRequired: true
+  }
+  authorizeParams {
+    response_type: &quot;access_token id_token&quot;
+    scope: &quot;openid profile email&quot;
+    audience: &quot;&lt;your-domain&gt;&quot;
+  }
+  usersFile: &quot;./src/test/resources/oauth2-users.conf&quot;
+}
+</code></pre><h5 id="users-file-in-the-same-format-as-in-github-example"><em>Users file in the same format as in GitHub example.</em></h5>
+<h4 id="implementation-own-oauth2servicefactory">Implementation own OAuth2ServiceFactory</h4>
 <p>OAuth2 backend allows to exchange engine to fetching / parsing data from your OAuth2 Authentication Server and Profile Resource. 
 By default we support Github data format. To do this, simply replace the OAuth2ServiceFactory by your own implementation. 
 After that you have to register your implementation using Java&apos;s ServiceLoader mechanism by prepare <code>META-INFO/service</code> 
 resource for <code>pl.touk.nussknacker.ui.security.oauth2.OAuth2ServiceFactory</code>. You can find an example at tests in 
 <code>ExampleOAuth2ServiceFactory</code> file.</p>
-<pre><code>You can store passwords as plaintext or (preferably) encrypted using bcrypt. To compute encrypted passiowrd you can use following python script:
-```python
-import bcrypt
-print(bcrypt.hashpw(&quot;password_to_encode&quot;.encode(&quot;utf8&quot;), bcrypt.gensalt(rounds = 12, prefix = &quot;2a&quot;)))
-</code></pre><h2 id="implementing-own-security-provider">Implementing own security provider</h2>
+<p>You can store passwords as plaintext or (preferably) encrypted using bcrypt. To compute encrypted password you can use following python script:</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> bcrypt
+print(bcrypt.hashpw(<span class="hljs-string">&quot;password_to_encode&quot;</span>.encode(<span class="hljs-string">&quot;utf8&quot;</span>), bcrypt.gensalt(rounds = <span class="hljs-number">12</span>, prefix = <span class="hljs-string">&quot;2a&quot;</span>)))
+</code></pre>
+<h2 id="implementing-own-security-provider">Implementing own security provider</h2>
 <p>In order to implement authentication provider you have to implement trait: </p>
 <pre><code class="lang-java">trait AuthenticatorFactory {
   <span class="hljs-function">def <span class="hljs-title">createAuthenticator</span><span class="hljs-params">(config: Config, classLoader: ClassLoader)</span>: AuthenticationDirective[LoggedUser]
@@ -607,7 +688,7 @@ Please note that there can be <strong>only</strong> one implementation on the cl
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Security","level":"2.5","depth":1,"next":{"title":"Architecture","level":"3.1","depth":1,"path":"Architecture.md","ref":"Architecture.md","articles":[]},"previous":{"title":"Configuration","level":"2.4","depth":1,"path":"Configuration.md","ref":"Configuration.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Security.md","mtime":"2020-09-03T09:14:10.715Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-09-03T09:15:02.287Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Security","level":"2.5","depth":1,"next":{"title":"Architecture","level":"3.1","depth":1,"path":"Architecture.md","ref":"Architecture.md","articles":[]},"previous":{"title":"Configuration","level":"2.4","depth":1,"path":"Configuration.md","ref":"Configuration.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{"nussknackerVersion":"0.0.11","flinkMajorVersion":"1.9"},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"Security.md","mtime":"2020-11-17T06:26:45.522Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-11-17T06:27:35.018Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
