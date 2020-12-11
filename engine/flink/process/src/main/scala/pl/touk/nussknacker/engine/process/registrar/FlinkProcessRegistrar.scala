@@ -25,7 +25,7 @@ import pl.touk.nussknacker.engine.graph.node.BranchEndDefinition
 import pl.touk.nussknacker.engine.process.compiler.{FlinkProcessCompiler, FlinkProcessCompilerData}
 import pl.touk.nussknacker.engine.process.typeinformation.TypeInformationDetectionUtils
 import pl.touk.nussknacker.engine.process.util.StateConfiguration.RocksDBStateBackendConfig
-import pl.touk.nussknacker.engine.process.util.{MetaDataExtractor, UserClassLoader}
+import pl.touk.nussknacker.engine.process.util.MetaDataExtractor
 import pl.touk.nussknacker.engine.process.{CheckpointConfig, ExecutionConfigPreparer, FlinkCompatibilityProvider}
 import pl.touk.nussknacker.engine.resultcollector.{ProductionServiceInvocationCollector, ResultCollector}
 import pl.touk.nussknacker.engine.splittedgraph.end.BranchEnd
@@ -48,7 +48,7 @@ class FlinkProcessRegistrar(compileProcess: (EspProcess, ProcessVersion, Deploym
   implicit def millisToTime(duration: Long): Time = Time.of(duration, TimeUnit.MILLISECONDS)
 
   def register(env: StreamExecutionEnvironment, process: EspProcess, processVersion: ProcessVersion, deploymentData: DeploymentData, testRunId: Option[TestRunId] = None): Unit = {
-    usingRightClassloader(env) {
+    usingRightClassloader(env) { userClassLoader =>
       //TODO: move creation outside Registrar, together with refactoring SinkInvocationCollector...
       val collector = testRunId.map(new TestServiceInvocationCollector(_)).getOrElse(ProductionServiceInvocationCollector)
 
@@ -56,7 +56,6 @@ class FlinkProcessRegistrar(compileProcess: (EspProcess, ProcessVersion, Deploym
       val userClassLoader = UserClassLoader.get("root")
       //here we are sure the classloader is ok
       val processWithDeps = processCompilation(userClassLoader)
-
       streamExecutionEnvPreparer.preRegistration(env, processWithDeps)
       val typeInformationDetection = TypeInformationDetectionUtils.forExecutionConfig(env.getConfig, userClassLoader)
       register(env, processCompilation, processWithDeps, testRunId, typeInformationDetection)
@@ -66,12 +65,17 @@ class FlinkProcessRegistrar(compileProcess: (EspProcess, ProcessVersion, Deploym
 
   protected def isRemoteEnv(env: StreamExecutionEnvironment): Boolean = env.getJavaEnv.isInstanceOf[RemoteStreamEnvironment]
 
-  protected def usingRightClassloader(env: StreamExecutionEnvironment)(action: => Unit): Unit = {
+  //In remote env we assume FlinkProcessRegistrar is loaded via userClassloader. If this is not the case,
+  //this method should be overloaded
+  protected def usingRightClassloader(env: StreamExecutionEnvironment)(action: ClassLoader => Unit): Unit = {
     if (!isRemoteEnv(env)) {
       val flinkLoaderSimulation = streamExecutionEnvPreparer.flinkClassLoaderSimulation
-      ThreadUtils.withThisAsContextClassLoader[Unit](flinkLoaderSimulation)(action)
+      ThreadUtils.withThisAsContextClassLoader[Unit](flinkLoaderSimulation) {
+        action(flinkLoaderSimulation)
+      }
     } else {
-      action
+      val userLoader = getClass.getClassLoader
+      action(userLoader)
     }
   }
 
