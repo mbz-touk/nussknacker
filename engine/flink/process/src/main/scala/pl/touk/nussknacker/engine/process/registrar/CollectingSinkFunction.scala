@@ -11,7 +11,7 @@ private[registrar] class CollectingSinkFunction(val compiledProcessWithDepsProvi
                                                 collectingSink: SinkInvocationCollector, sink: SinkPart)
   extends RichSinkFunction[InterpretationResult] with WithCompiledProcessDeps {
 
-  override def invoke(value: InterpretationResult, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(value: InterpretationResult, context: SinkFunction.Context): Unit = {
     exceptionHandler.handling(Some(sink.id), value.finalContext) {
       collectingSink.collect(value)
     }
