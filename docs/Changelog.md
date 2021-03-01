@@ -40,6 +40,7 @@ Nussknacker versions
 * [#1533](https://github.com/TouK/nussknacker/pull/1533) Fix: Update process with same json
 * [#1546](https://github.com/TouK/nussknacker/pull/1546) Unions (e.g after split) are possible in standalone mode. Also, it's possible to define transformers which operate on all results (e.g. for sorting recommendations)
 * [#1547](https://github.com/TouK/nussknacker/pull/1547) Publish first version of BOM including dependencyOverrides
+* [#1439](https://github.com/TouK/nussknacker/pull/1439) Upgrade do Flink 1.12          
 
 0.3.1 (not released yet) 
 ------------------------
