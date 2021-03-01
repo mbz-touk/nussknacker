@@ -63,6 +63,10 @@ To see biggest differences please consult the [changelog](Changelog.md).
   `StandaloneContext`, `StandaloneContextLifecycle`, `MetricsProvider`
 * [#1558](https://github.com/TouK/nussknacker/pull/1558) `FlinkProcessRegistrar` takes configuration directly from `FlinkProcessCompiler` (this can affect some tests setup) 
 
+* [#1439](https://github.com/TouK/nussknacker/pull/1439) Upgrade do Flink 1.12.
+  * `TimeCharacteristic` is deprecated, and should be handled automatically by Flink, see `TimeCharacteristicCompatibility` for details. 
+  * `UserClassLoader` was removed, use appropriate Flink objects or context ClassLoader.          
+          
 ## In version 0.3.0
 
 * [#1313](https://github.com/TouK/nussknacker/pull/1313) Kafka Avro API passes `KafkaConfig` during `TypeInformation` determining
