@@ -1,10 +1,9 @@
 import {UnknownFunction} from "../../../../../types/common"
 import {Formatter, FormatterType, typeFormatters} from "./Formatter"
-import {SimpleEditor} from "./Editor"
+import {Editor, SimpleEditor} from "./Editor"
 import i18next from "i18next"
 import React from "react"
 import Textarea from "../field/Textarea"
-import {ExpressionLang} from "./types"
 
 type Props = {
     expressionObj: $TodoType,
@@ -35,7 +34,7 @@ const stringPattern = /(^'.*'$)|(^".*"$)/
 const parseable = (expressionObj) => {
   const expression = expressionObj.expression
   const language = expressionObj.language
-  return stringPattern.test(expression) && language === ExpressionLang.SpEL
+  return stringPattern.test(expression) && language === "spel"
 }
 
 TextareaEditor.switchableTo = (expressionObj) => parseable(expressionObj)

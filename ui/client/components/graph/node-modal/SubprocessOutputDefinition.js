@@ -1,7 +1,6 @@
 import _ from "lodash"
 import React from "react"
 import {v4 as uuid4} from "uuid"
-import {ExpressionLang} from "./editors/expression/types"
 import {errorValidator, mandatoryValueValidator} from "./editors/Validators"
 import LabeledInput from "./editors/field/LabeledInput"
 import LabeledTextarea from "./editors/field/LabeledTextarea"
@@ -11,7 +10,7 @@ import MapVariable from "./MapVariable"
 const SubprocessOutputDefinition = ({isMarked, node, removeElement, addElement, onChange, readOnly, showValidation, errors, renderFieldLabel}) => {
 
   const addField = () => {
-    addElement("fields", {name: "", uuid: uuid4(), expression: {expression: "", language: ExpressionLang.SpEL}})
+    addElement("fields", {name: "", uuid: uuid4(), expression: {expression: "", language: "spel"}})
   }
 
   const onInputChange = (path, event) => onChange(path, event.target.value)

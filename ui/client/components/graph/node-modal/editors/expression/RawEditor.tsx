@@ -4,10 +4,9 @@ import {UnknownFunction} from "../../../../../types/common"
 import ExpressionSuggest from "./ExpressionSuggest"
 import {Editor} from "./Editor"
 import {VariableTypes} from "../../../../../types"
-import {ExpressionObj} from "./types"
 
 type Props = {
-  expressionObj: ExpressionObj,
+  expressionObj: $TodoType,
   validators: Array<$TodoType>,
   isMarked: boolean,
   showValidation: boolean,
@@ -20,7 +19,7 @@ type Props = {
   validationLabelInfo?: string,
 }
 
-const RawEditor: Editor<Partial<Props>> = (props) => {
+const RawEditor = (props: Props) => {
 
   const {
     expressionObj, validators, isMarked, showValidation, readOnly,
@@ -50,4 +49,4 @@ const RawEditor: Editor<Partial<Props>> = (props) => {
   )
 }
 
-export default RawEditor
+export default RawEditor as Editor<Props>
