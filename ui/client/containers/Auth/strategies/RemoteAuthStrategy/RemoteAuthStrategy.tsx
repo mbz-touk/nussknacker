@@ -39,7 +39,7 @@ export const RemoteAuthStrategy: StrategyConstructor = class RemoteAuthStrategy 
   private pendingClient = new PendingPromise<AuthClient>()
   Wrapper = createAuthWrapper(this.urlWithScope, auth => this.pendingClient.resolve(auth))
 
-  async inteceptor(error?: {response?: {status?: AuthErrorCodes}}): Promise<unknown> {
+  async interceptor(error?: {response?: {status?: AuthErrorCodes}}): Promise<unknown> {
     if (error?.response?.status === AuthErrorCodes.HTTP_UNAUTHORIZED_CODE) {
       await this.handleAuth()
     }

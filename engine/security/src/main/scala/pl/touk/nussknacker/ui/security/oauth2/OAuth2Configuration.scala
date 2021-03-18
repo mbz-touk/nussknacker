@@ -66,7 +66,7 @@ object ProfileFormat extends Enumeration {
 trait JwtConfiguration {
   def accessTokenIsJwt: Boolean
   def userinfoFromIdToken: Boolean
-  def authServerPublicKey: PublicKey
+  def authServerPublicKey: Option[PublicKey]
   def idTokenNonceVerificationRequired: Boolean
 }
 
@@ -85,7 +85,7 @@ object JwtConfiguration {
                                certificate: Option[String],
                                certificateFile: Option[String],
                                idTokenNonceVerificationRequired: Boolean = false) extends JwtConfiguration {
-    def authServerPublicKey: PublicKey = {
+    def authServerPublicKey: Option[PublicKey] = {
       val charset: Charset = StandardCharsets.UTF_8
 
       def getContent(content: Option[String], file: Option[String]): Option[String] =
@@ -93,10 +93,10 @@ object JwtConfiguration {
           Source.fromFile(path, StandardCharsets.UTF_8.name).mkString
         })
 
-      getContent(publicKey, publicKeyFile).map(CertificatesAndKeys.publicKeyFromString(_, charset)) orElse
-        getContent(certificate, certificateFile).map(CertificatesAndKeys.publicKeyFromStringCertificate(_, charset)) getOrElse {
-        throw new Exception("one of the: 'publicKey', 'publicKeyFile', 'certificate', 'certificateFile' fields should be provided in the authentication.jwt configuration")
-      }
+      getContent(publicKey, publicKeyFile).map(CertificatesAndKeys.publicKeyFromString(_, charset))
+        .orElse(getContent(certificate, certificateFile).map(CertificatesAndKeys.publicKeyFromStringCertificate(_, charset)))
+//        throw new Exception("one of the: 'publicKey', 'publicKeyFile', 'certificate', 'certificateFile' fields should be provided in the authentication.jwt configuration")
+//      }
     }
   }
 }

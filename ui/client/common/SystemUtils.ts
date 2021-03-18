@@ -36,6 +36,7 @@ class SystemUtils {
 
   public setAuthorizationToken = (token): void => {
     api.interceptors.request.use((config: AxiosRequestConfig) => {
+      console.log("Setting authorization token")
       _.set(config.headers, SystemUtils.AUTHORIZATION_HEADER_NAMESPACE, this.authorizationToken())
       return config
     })

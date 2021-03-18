@@ -25,7 +25,7 @@ export function StrategyInitializer(props: PropsWithChildren<Props>): JSX.Elemen
       boundInterceptor.current = api.interceptors.response.use(
         response => response,
         async error => {
-          await strategy.inteceptor?.(error)
+          await strategy.interceptor?.(error)
           return Promise.reject(error)
         },
       )

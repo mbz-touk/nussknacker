@@ -21,7 +21,7 @@ export const OAuth2Strategy: StrategyConstructor = class OAuth2Strategy implemen
     window.location.replace(`${authorizeUrl}&nonce=${SystemUtils.getNonce()}`)
   }
 
-  inteceptor(error?: {response?: {status?: AuthErrorCodes}}): Promise<unknown> {
+  interceptor(error?: {response?: {status?: AuthErrorCodes}}): Promise<unknown> {
     if (error?.response?.status === AuthErrorCodes.HTTP_UNAUTHORIZED_CODE) {
       this.redirectToAuthorizeUrl(this.settings.authorizeUrl)
     }

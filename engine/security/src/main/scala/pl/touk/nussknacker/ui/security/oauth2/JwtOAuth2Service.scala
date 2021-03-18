@@ -31,7 +31,7 @@ class JwtOAuth2Service[
 
   protected val introspectAccessToken: Boolean = configuration.jwt.exists(_.accessTokenIsJwt)
 
-  protected val jwtValidator: Option[JwtValidator] = configuration.jwt.map(_.authServerPublicKey).map(new JwtValidator(_))
+  protected val jwtValidator: Option[JwtValidator] = configuration.jwt.flatMap(_.authServerPublicKey).map(new JwtValidator(_))
 
   protected def introspectToken[Claims : Decoder](token: String): Option[Claims] =
     jwtValidator.map(_.introspect[Claims](token) match {

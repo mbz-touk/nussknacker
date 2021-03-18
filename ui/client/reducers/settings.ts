@@ -29,7 +29,7 @@ const initialState: SettingsState = {
   loggedUser: {},
   featuresSettings: {},
   authenticationSettings: {
-    backend: AuthBackends.BASIC,
+    backend: AuthBackends.OAUTH2,
   },
   analyticsSettings: {},
   processDefinitionData: {},

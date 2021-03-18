@@ -14,7 +14,7 @@ export interface Strategy {
   Wrapper?: ComponentType,
 
   // intercept axios errors (to handle 401)
-  inteceptor?<E>(error: E): Promise<unknown>,
+  interceptor?<E>(error: E): Promise<unknown>,
 
   // init strategy and try to authorize (show login)
   handleAuth(): Promise<unknown>,
