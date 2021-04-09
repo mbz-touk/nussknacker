@@ -30,6 +30,7 @@ To see biggest differences please consult the [changelog](Changelog.md).
   - Slight change of API of `StringKeyedValueMapper`
   - Change of semantics of some parameters of `AggregatorFunction`, `AggregatorFunctionMixin` (storedAggregateType becomes aggregateElementType)  
 * [#1405](https://github.com/TouK/nussknacker/pull/1405) 'KafkaAvroSink' requires more generic 'AvroSinkValue' as value parameter
+* [#1514](https://github.com/TouK/nussknacker/pull/1514) `ExecutionConfigPreparer` has different method parameter - `JobData`, which has more info than previous parameters
 
 ## In version 0.3.0
 
