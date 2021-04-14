@@ -1,7 +1,9 @@
 package pl.touk.nussknacker.engine.standalone.http
 
+import akka.event.Logging
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.http.scaladsl.server.{Directives, PathMatcher1, Route}
 import cats.data.NonEmptyList
 import com.typesafe.scalalogging.LazyLogging
@@ -17,7 +19,9 @@ class ManagementRoute(deploymentService: DeploymentService)
 
   def ProcessNameSegment: PathMatcher1[ProcessName] = Segment.map(ProcessName(_))
 
-  def route(implicit ec: ExecutionContext): Route =
+  val debug = DebuggingDirectives.logRequestResult((s"standalone-management", Logging.DebugLevel))
+
+  def route(implicit ec: ExecutionContext): Route = debug {
     path("deploy") {
       post {
         entity(as[StandaloneDeploymentData]) { data =>
@@ -51,6 +55,7 @@ class ManagementRoute(deploymentService: DeploymentService)
         }
       }
     }
+  }
 
 
   def toResponse(either: Either[NonEmptyList[DeploymentError], Unit]): ToResponseMarshallable = either match {

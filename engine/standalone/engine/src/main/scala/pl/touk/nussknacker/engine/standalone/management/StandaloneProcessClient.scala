@@ -92,14 +92,14 @@ class HttpStandaloneProcessClient(managementUrl: String)(implicit backend: SttpB
       .post(managementUri.path("deploy"))
       .body(deploymentData)
       .send()
-      .map(_ => ())
+      .flatMap(handleUnitResponse)
   }
 
   def cancel(processName: ProcessName): Future[Unit] = {
     basicRequest
       .post(managementUri.path("cancel", processName.value))
       .send()
-      .map(_ => ())
+      .flatMap(handleUnitResponse)
   }
 
   def findStatus(name: ProcessName): Future[Option[ProcessState]] = {
@@ -111,6 +111,11 @@ class HttpStandaloneProcessClient(managementUrl: String)(implicit backend: SttpB
   }
 
   override def close(): Unit = Await.result(backend.close(), Duration(10, TimeUnit.SECONDS))
+
+  private def handleUnitResponse(response: Response[Either[String, String]]): Future[Unit] = (response.code, response.body) match {
+    case (code, Right(_)) if code.isSuccess => Future.successful(())
+    case (code, Left(error)) => Future.failed(new RuntimeException(s"Request failed: $error, code: $code"))
+  }
 
 }
 
