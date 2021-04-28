@@ -3,6 +3,7 @@ package pl.touk.nussknacker.engine.flink.util.metrics
 import cats.data.NonEmptyList
 import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.metrics.{Counter, Gauge, Histogram, Meter, MetricGroup}
+import org.apache.flink.util.Preconditions
 import pl.touk.nussknacker.engine.flink.api.{NkGlobalParameters, RuntimeContextLifecycle}
 
 /*
@@ -16,36 +17,60 @@ import pl.touk.nussknacker.engine.flink.api.{NkGlobalParameters, RuntimeContextL
 class MetricUtils(runtimeContext: RuntimeContext) {
 
   def counter(nameParts: NonEmptyList[String], tags: Map[String, String]): Counter = {
-    val (group, name) = groupsWithName(nameParts, tags)
-    group.counter(name)
+    val groupsWithNames =  if (useLegacyMetricsMode) {
+      List(groupsWithName(nameParts, tags), groupsWithNameForLegacyMode(nameParts, tags))
+    } else {
+      List(groupsWithName(nameParts, tags))
+    }
+
+    new MultiCounter(groupsWithNames.map {
+      case (group, name) => group.counter(name)
+    })
   }
 
   def gauge[T, Y<: Gauge[T]](nameParts: NonEmptyList[String], tags: Map[String, String], gauge: Y): Y = {
     val (group, name) = groupsWithName(nameParts, tags)
     group.gauge[T, Y](name, gauge)
+
+    if (useLegacyMetricsMode) {
+      val (groupOld, nameOld) = groupsWithNameForLegacyMode(nameParts, tags)
+      groupOld.gauge[T, Y](nameOld, gauge)
+    }
+
+    gauge
   }
 
   //currently not used - maybe we should? :)
   def meter(nameParts: NonEmptyList[String], tags: Map[String, String], meter: Meter): Meter = {
     val (group, name) = groupsWithName(nameParts, tags)
     group.meter(name, meter)
+
+    if (useLegacyMetricsMode) {
+      val (groupOld, nameOld) = groupsWithNameForLegacyMode(nameParts, tags)
+      groupOld.meter(nameOld, meter)
+    }
+
+    meter
   }
 
   def histogram(nameParts: NonEmptyList[String], tags: Map[String, String], histogram: Histogram): Histogram = {
     val (group, name) = groupsWithName(nameParts, tags)
     group.histogram(name, histogram)
+
+    if (useLegacyMetricsMode) {
+      val (groupOld, nameOld) = groupsWithNameForLegacyMode(nameParts, tags)
+      groupOld.histogram(nameOld, histogram)
+    }
+
+    histogram
   }
 
   private val useLegacyMetricsMode: Boolean =
     NkGlobalParameters.readFromContext(runtimeContext.getExecutionConfig).flatMap(_.configParameters.flatMap(_.useLegacyMetrics)).getOrElse(false)
 
   private def groupsWithName(nameParts: NonEmptyList[String], tags: Map[String, String]): (MetricGroup, String) = {
-    if (useLegacyMetricsMode) {
-      groupsWithNameForLegacyMode(nameParts, tags)
-    } else {
-      val namespaceTags = extractTags(NkGlobalParameters.readFromContext(runtimeContext.getExecutionConfig))
-      tagMode(nameParts, tags ++ namespaceTags)
-    }
+    val namespaceTags = extractTags(NkGlobalParameters.readFromContext(runtimeContext.getExecutionConfig))
+    tagMode(nameParts, tags ++ namespaceTags)
   }
 
   private def tagMode(nameParts: NonEmptyList[String], tags: Map[String, String]): (MetricGroup, String) = {
@@ -61,8 +86,9 @@ class MetricUtils(runtimeContext: RuntimeContext) {
   }
 
   private def groupsWithNameForLegacyMode(nameParts: NonEmptyList[String], tags: Map[String, String]): (MetricGroup, String) = {
-    def insertTag(tagId: String)(nameParts: NonEmptyList[String]): (MetricGroup, String)
-      = tagMode(NonEmptyList(nameParts.head, tags(tagId)::nameParts.tail), Map.empty)
+    def insertTag(tagId: String)(nameParts: NonEmptyList[String]): (MetricGroup, String) =
+      tagMode(NonEmptyList(nameParts.head, tags(tagId)::nameParts.tail), Map.empty)
+
     val insertNodeId = insertTag("nodeId") _
 
     nameParts match {
@@ -111,4 +137,24 @@ trait WithMetrics extends RuntimeContextLifecycle {
     this.metricUtils = new MetricUtils(runtimeContext)
   }
 
+}
+
+//It's copy of MultiCounterWrapper
+private class MultiCounter (val counters: List[Counter]) extends Counter {
+  Preconditions.checkArgument(counters.nonEmpty)
+
+  override def inc(): Unit =
+    counters.foreach(_.inc())
+
+  override def inc(n: Long): Unit =
+    counters.foreach(_.inc(n))
+
+  override def dec(): Unit =
+    counters.foreach(_.dec())
+
+  override def dec(n: Long): Unit =
+    counters.foreach(_.dec(n))
+
+  override def getCount: Long =  // assume that the counters are not accessed directly elsewhere
+    counters.head.getCount
 }
