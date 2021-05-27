@@ -56,7 +56,7 @@ class SettingsResources(val processRepository: FetchingProcessRepository[Future]
         complete {
           val config = for {
             processDetails <- OptionT(processRepository.fetchProcessDetails(ProcessName(processName)))
-          } yield toolbarsConfigProvider.configForCategory(processDetails.processCategory, processDetails.isSubprocess)
+          } yield toolbarsConfigProvider.configForCategory(processName, processDetails.processCategory, processDetails.isSubprocess)
 
           config.value
         }
