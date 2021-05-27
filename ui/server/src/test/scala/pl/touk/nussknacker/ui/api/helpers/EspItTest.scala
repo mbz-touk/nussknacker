@@ -113,7 +113,7 @@ trait EspItTest extends LazyLogging with WithHsqlDbTesting with TestPermissions 
   val authenticationConfig = DefaultAuthenticationConfiguration.create(testConfig)
   val analyticsConfig = AnalyticsConfig(testConfig)
 
-  val processAndSubprocessToolbarsConfig = ProcessAndSubprocessToolbarsConfig.create(config)
+  val processAndSubprocessToolbarsConfig = ProcessAndSubprocessToolbarsConfig.create(testConfig)
   val toolbarsConfigProvider = new ToolbarsConfigProvider(processAndSubprocessToolbarsConfig)
 
   val usersRoute = new UserResources(processCategoryService)
