@@ -8,7 +8,6 @@ import com.typesafe.config.{Config, ConfigFactory}
 import pl.touk.nussknacker.engine.util.cache.CacheConfig
 import pl.touk.nussknacker.engine.util.config.ConfigFactoryExt
 import pl.touk.nussknacker.ui.security.api.AuthenticationConfiguration.{ConfigRule, ConfigUser}
-import pl.touk.nussknacker.ui.security.api.AuthenticationMethod.AuthenticationMethod
 import pl.touk.nussknacker.ui.security.api.GlobalPermission.GlobalPermission
 import pl.touk.nussknacker.ui.security.api.Permission.Permission
 
@@ -19,7 +18,7 @@ trait AuthenticationConfiguration {
   def authSeverPublicKey: Option[PublicKey] = Option.empty
   def idTokenNonceVerificationRequired: Boolean
   def implicitGrantEnabled: Boolean
-  def method: AuthenticationMethod
+  def method: String
   def usersFile: URI
 
   val userConfig: Config = ConfigFactoryExt.parseUri(usersFile)
@@ -27,14 +26,6 @@ trait AuthenticationConfiguration {
   lazy val users: List[ConfigUser] = AuthenticationConfiguration.getUsers(userConfig)
 
   lazy val rules: List[ConfigRule] = AuthenticationConfiguration.getRules(userConfig)
-}
-
-object AuthenticationMethod extends Enumeration {
-  type AuthenticationMethod = Value
-
-  val BasicAuth = Value("BasicAuth")
-  val OAuth2 = Value("OAuth2")
-  val Other = Value("Other")
 }
 
 object AuthenticationConfiguration {
@@ -46,8 +37,6 @@ object AuthenticationConfiguration {
   val methodConfigPath = s"$authenticationConfigPath.method"
   val usersConfigurationPath = "users"
   val rulesConfigurationPath = "rules"
-
-  def parseMethod(config: Config): AuthenticationMethod = config.as[AuthenticationMethod](methodConfigPath)
 
   def getUsers(config: Config): List[ConfigUser] = config.as[List[ConfigUser]](usersConfigurationPath)
 
@@ -63,26 +52,6 @@ object AuthenticationConfiguration {
                         categories: List[String] = List.empty,
                         permissions: List[Permission] = List.empty,
                         globalPermissions: List[GlobalPermission] = List.empty)
-}
-
-case class DefaultAuthenticationConfiguration(method: AuthenticationMethod = AuthenticationMethod.Other, usersFile: URI,
-                                              cachingHashes: Option[CachingHashesConfig]) extends AuthenticationConfiguration {
-
-  def cachingHashesOrDefault: CachingHashesConfig = cachingHashes.getOrElse(CachingHashesConfig.defaultConfig)
-
-  def implicitGrantEnabled: Boolean = false
-
-  def idTokenNonceVerificationRequired: Boolean = false
-}
-
-object DefaultAuthenticationConfiguration {
-  import AuthenticationConfiguration._
-  import pl.touk.nussknacker.engine.util.config.CustomFicusInstances._
-  import net.ceedubs.ficus.readers.ArbitraryTypeReader._
-  import net.ceedubs.ficus.readers.EnumerationReader._
-
-  def create(config: Config): DefaultAuthenticationConfiguration =
-    config.as[DefaultAuthenticationConfiguration](authenticationConfigPath)
 }
 
 case class CachingHashesConfig(enabled: Option[Boolean],

@@ -11,6 +11,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class OAuth2AuthenticatorFactory extends AuthenticatorFactory with LazyLogging {
 
+  def name: String = OAuth2Configuration.name
+
   override def createAuthenticator(config: Config, classLoader: ClassLoader, allCategories: List[String])(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticatorData = {
     val configuration = OAuth2Configuration.create(config)
     val service = OAuth2ServiceProvider(configuration, classLoader, allCategories)

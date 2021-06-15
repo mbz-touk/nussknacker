@@ -12,12 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object AuthenticatorProvider extends LazyLogging {
   def apply(config: Config, classLoader: ClassLoader, allCategories: List[String])(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticatorData = {
-    val loaded = ScalaServiceLoader.loadClass[AuthenticatorFactory](classLoader) {
-      AuthenticationConfiguration.parseMethod(config) match {
-        case AuthenticationMethod.OAuth2 => OAuth2AuthenticatorFactory()
-        case _ => BasicAuthenticatorFactory()
-      }
-    }
+
+    val loaded = ScalaServiceLoader.loadNamed[AuthenticatorFactory](config.getString(AuthenticationConfiguration.methodConfigPath), List(OAuth2AuthenticatorFactory(), BasicAuthenticatorFactory()))
 
     logger.info(s"Loaded authenticator method: $loaded.")
 

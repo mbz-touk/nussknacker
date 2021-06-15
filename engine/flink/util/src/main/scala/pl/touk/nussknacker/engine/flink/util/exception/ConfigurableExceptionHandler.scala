@@ -50,6 +50,6 @@ class ConfigurableExceptionHandler(metaData: MetaData,
 
   private def extractBaseConsumer(baseConfig: Config): FlinkEspExceptionConsumer = {
     val providerName = baseConfig.as[String](typeConfigPath)
-    ScalaServiceLoader.loadNamed[FlinkEspExceptionConsumerProvider](providerName, classLoader).create(metaData, baseConfig)
+    ScalaServiceLoader.loadNamed[FlinkEspExceptionConsumerProvider](providerName, classLoader = classLoader).create(metaData, baseConfig)
   }
 }

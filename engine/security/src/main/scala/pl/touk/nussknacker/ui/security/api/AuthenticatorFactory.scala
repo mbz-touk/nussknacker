@@ -3,11 +3,12 @@ package pl.touk.nussknacker.ui.security.api
 import akka.http.scaladsl.server.directives.AuthenticationDirective
 import akka.http.scaladsl.server.Route
 import com.typesafe.config.Config
+import pl.touk.nussknacker.engine.api.NamedServiceProvider
 import sttp.client.{NothingT, SttpBackend}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthenticatorFactory {
+trait AuthenticatorFactory extends NamedServiceProvider {
   import AuthenticatorFactory._
 
   val realm = "nussknacker"
