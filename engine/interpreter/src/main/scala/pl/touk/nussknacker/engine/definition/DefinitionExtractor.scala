@@ -237,18 +237,21 @@ object TypeInfos {
 
   @JsonCodec(encodeOnly = true) case class MethodInfo(parameters: List[Parameter], refClazz: TypingResult, description: Option[String], varArgs: Boolean)
 
-  case class ClazzDefinition(clazzName: TypingResult, methods: Map[String, List[MethodInfo]]) {
+  @JsonCodec(encodeOnly = true) case class FieldInfo(refClazz: TypingResult, description: Option[String])
 
-    def getPropertyOrFieldType(methodName: String): Option[TypingResult] = {
-      val filtered = methods.get(methodName).toList
+  case class ClazzDefinition(clazzName: TypingResult, fields: Map[String, FieldInfo], methods: Map[String, List[MethodInfo]]) {
+
+    def getPropertyOrFieldType(name: String): Option[TypingResult] = {
+      val filteredMethods = methods.get(name).toList
         .flatMap(_.filter(_.parameters.isEmpty))
         .map(_.refClazz)
-      filtered match {
+
+      val filteredFields = fields.get(name).toList.map(_.refClazz)
+
+      filteredFields ++ filteredMethods match {
         case Nil => None
         case nonEmpty => Some(Typed(nonEmpty.toSet))
       }
     }
-
   }
-
 }

@@ -2,14 +2,13 @@ package pl.touk.nussknacker.engine.types
 
 import java.util
 import java.util.regex.Pattern
-
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.{FunSuite, Matchers, OptionValues}
 import pl.touk.nussknacker.engine.api.typed.typing.{Typed, TypedClass}
 import pl.touk.nussknacker.engine.api.process.PropertyFromGetterExtractionStrategy.{AddPropertyNextToGetter, DoNothing, ReplaceGetterWithProperty}
 import pl.touk.nussknacker.engine.api.process.{ClassExtractionSettings, ClassMemberPatternPredicate, PropertyFromGetterExtractionStrategy, SuperClassPatternPredicate}
 import pl.touk.nussknacker.engine.api.{Documentation, Hidden, HideToString, ParamName}
-import pl.touk.nussknacker.engine.definition.TypeInfos.{ClazzDefinition, MethodInfo, Parameter}
+import pl.touk.nussknacker.engine.definition.TypeInfos.{ClazzDefinition, FieldInfo, MethodInfo, Parameter}
 import pl.touk.nussknacker.engine.spel.SpelExpressionRepr
 import pl.touk.nussknacker.engine.types.TypesInformationExtractor._
 
@@ -38,30 +37,45 @@ class EspTypeUtilsSpec extends FunSuite with Matchers with OptionValues {
     val sampleClassInfo = singleClassDefinition[SampleClass]()
 
     sampleClassInfo.value.methods shouldBe Map(
-      "foo" -> List(MethodInfo(List.empty, Typed(Integer.TYPE), None, varArgs = false)),
-      "bar" -> List(MethodInfo(List.empty, Typed[String], None, varArgs = false)),
       "toString" -> List(MethodInfo(List(), Typed[String], None, varArgs = false))
+    )
+
+    sampleClassInfo.value.fields shouldBe Map(
+      "foo" -> FieldInfo(Typed(Integer.TYPE), None),
+      "bar" -> FieldInfo(Typed[String], None)
     )
   }
 
   test("should extract generic field") {
     val sampleClassInfo = singleClassDefinition[JavaClassWithGenericField]()
 
-    sampleClassInfo.value.methods("list").head.refClazz shouldEqual Typed.fromDetailedType[java.util.List[String]]
+    sampleClassInfo.value.fields("list").refClazz shouldEqual Typed.fromDetailedType[java.util.List[String]]
   }
 
   test("shoud detect java beans and fields in java class") {
     def methods(strategy: PropertyFromGetterExtractionStrategy) =
       singleClassDefinition[JavaSampleClass](ClassExtractionSettings.Default.copy(propertyExtractionStrategy = strategy)).value.methods.keys.toSet
 
+    def fields(strategy: PropertyFromGetterExtractionStrategy) =
+      singleClassDefinition[JavaSampleClass](ClassExtractionSettings.Default.copy(propertyExtractionStrategy = strategy)).value.fields.keys.toSet
+
     val methodsForAddPropertyNextToGetter = methods(AddPropertyNextToGetter)
-    methodsForAddPropertyNextToGetter   shouldEqual Set("foo", "bar", "getBeanProperty", "isBooleanProperty", "getNotProperty", "toString", "beanProperty", "booleanProperty")
+    methodsForAddPropertyNextToGetter shouldEqual Set("getBeanProperty", "isBooleanProperty", "getNotProperty", "toString", "beanProperty", "booleanProperty")
+
+    val fieldsForAddPropertyNextToGetter = fields(AddPropertyNextToGetter)
+    fieldsForAddPropertyNextToGetter shouldEqual Set("foo", "bar")
 
     val methodsForReplaceGetterWithProperty = methods(ReplaceGetterWithProperty)
-    methodsForReplaceGetterWithProperty shouldEqual Set("foo", "bar", "beanProperty", "booleanProperty", "getNotProperty", "toString")
+    methodsForReplaceGetterWithProperty shouldEqual Set("beanProperty", "booleanProperty", "getNotProperty", "toString")
+
+    val fieldsForReplaceGetterWithProperty = fields(ReplaceGetterWithProperty)
+    fieldsForReplaceGetterWithProperty shouldEqual Set("foo", "bar")
 
     val methodsForDoNothing = methods(DoNothing)
-    methodsForDoNothing                 shouldEqual Set("foo", "bar", "getBeanProperty", "isBooleanProperty", "getNotProperty", "toString")
+    methodsForDoNothing shouldEqual Set("getBeanProperty", "isBooleanProperty", "getNotProperty", "toString")
+
+    val fieldsForDoNothing = fields(DoNothing)
+    fieldsForDoNothing shouldEqual Set("foo", "bar")
   }
 
   test("should skip hidden properties") {
@@ -87,8 +101,11 @@ class EspTypeUtilsSpec extends FunSuite with Matchers with OptionValues {
         val sampleClassInfo = infos.find(_.clazzName.asInstanceOf[TypedClass].klass.getName.contains(clazzName)).get
 
         sampleClassInfo.methods shouldBe Map(
-          "toString" -> List(MethodInfo(List(), Typed[String], None, varArgs = false)),
-          "foo" -> List(MethodInfo(List.empty, Typed(Integer.TYPE), None, varArgs = false))
+          "toString" -> List(MethodInfo(List(), Typed[String], None, varArgs = false))
+        )
+
+        sampleClassInfo.fields shouldBe Map(
+          "foo" -> FieldInfo(Typed(Integer.TYPE), None)
         )
       }
     }
@@ -98,24 +115,29 @@ class EspTypeUtilsSpec extends FunSuite with Matchers with OptionValues {
 
     val typeUtils = singleClassAndItsChildrenDefinition[Embeddable]()
 
-    typeUtils.find(_.clazzName == Typed[TestEmbedded]) shouldBe Some(ClazzDefinition(Typed[TestEmbedded], Map(
-      "string" -> List(MethodInfo(List(), Typed[String], None, varArgs = false)),
-      "javaList" -> List(MethodInfo(List(), Typed.fromDetailedType[java.util.List[String]], None, varArgs = false)),
-      "scalaList" -> List(MethodInfo(List(), Typed.fromDetailedType[List[String]], None, varArgs = false)),
-      "javaMap" -> List(MethodInfo(List(), Typed.fromDetailedType[java.util.Map[String, String]], None, varArgs = false)),
+    typeUtils.find(_.clazzName == Typed[TestEmbedded]) shouldBe Some(ClazzDefinition(Typed[TestEmbedded],
+      Map(
+        "javaMap" ->FieldInfo(Typed.fromDetailedType[java.util.Map[String, String]], None),
+        "javaList" -> FieldInfo(Typed.fromDetailedType[java.util.List[String]], None),
+        "string" -> FieldInfo(Typed[String], None),
+        "scalaList" -> FieldInfo(Typed.fromDetailedType[List[String]], None),
+
+      ),
+      Map(
       "toString" -> List(MethodInfo(List(), Typed[String], None, varArgs = false))
     )))
-
   }
 
   test("should not discover hidden fields") {
     val typeUtils = singleClassDefinition[ClassWithHiddenFields]()
 
-    typeUtils shouldBe Some(ClazzDefinition(Typed[ClassWithHiddenFields], Map(
-      "normalField" -> List(MethodInfo(List(), Typed[String], None, varArgs = false)),
-      "normalParam" -> List(MethodInfo(List(), Typed[String], None, varArgs = false)),
-      "toString" -> List(MethodInfo(List(), Typed[String], None, varArgs = false))
-    )))
+    typeUtils shouldBe Some(ClazzDefinition(Typed[ClassWithHiddenFields],
+      Map(
+        "normalField" -> FieldInfo(Typed[String], None),
+        "normalParam" -> FieldInfo(Typed[String], None),
+      ),
+      Map("toString" -> List(MethodInfo(List(), Typed[String], None, varArgs = false)))
+    ))
   }
 
   test("should skip toString method when HideToString implemented") {
@@ -185,7 +207,7 @@ class EspTypeUtilsSpec extends FunSuite with Matchers with OptionValues {
 
     val javaClazzInfo = singleClassDefinition[JavaSampleDocumentedClass]().value
 
-    val table = Table(
+    val methodTable = Table(
       ("method", "methodInfo"),
       //FIXME: scala 2.11, 2.12 have different behaviour - named parameters are extracted differently :/
       //("foo", MethodInfo(parameters = List(param[String]("fooParam1")), refClazz = Typed[Long], description = None)),
@@ -193,12 +215,22 @@ class EspTypeUtilsSpec extends FunSuite with Matchers with OptionValues {
       ("baz", List(MethodInfo(parameters = List(param[String]("bazparam1"), param[Int]("bazparam2")), refClazz = Typed[Long], description = Some(ScalaSampleDocumentedClass.bazDocs), varArgs = false))),
       //FIXME: scala 2.11, 2.12 have different behaviour - named parameters are extracted differently :/
       //("qux", MethodInfo(parameters = List(param[String]("quxParam1")), refClazz = Typed[Long], description = Some(ScalaSampleDocumentedClass.quxDocs))),
-      ("field1", List(MethodInfo(parameters = List.empty, refClazz = Typed[Long], description = None, varArgs = false))),
-      ("field2", List(MethodInfo(parameters = List.empty, refClazz = Typed[Long], description = Some(ScalaSampleDocumentedClass.field2Docs), varArgs = false)))
     )
-    forAll(table){ case (method, methodInfo) =>
+
+    forAll(methodTable){ case (method, methodInfo) =>
         scalaClazzInfo.methods(method) shouldBe methodInfo
         javaClazzInfo.methods(method) shouldBe methodInfo
+    }
+
+    val fieldsTable = Table(
+      ("field", "fieldInfo"),
+      ("field1", FieldInfo(refClazz = Typed[Long], description = None)),
+      ("field2", FieldInfo(refClazz = Typed[Long], description = Some(ScalaSampleDocumentedClass.field2Docs)))
+    )
+
+    forAll(fieldsTable){ case (field, fieldInfo) =>
+      scalaClazzInfo.fields(field) shouldBe fieldInfo
+      javaClazzInfo.fields(field) shouldBe fieldInfo
     }
   }
 

@@ -64,8 +64,8 @@ object TypesInformationExtractor extends LazyLogging with ExecutionTimeMeasuring
       Set.empty
   }
 
-  private def typesFromTypedClass(typedClass: TypedClass): Set[TypingResult]
-    = typedClass.params.flatMap(typesFromTypingResult).toSet + Typed(typedClass.klass)
+  private def typesFromTypedClass(typedClass: TypedClass): Set[TypingResult] =
+    typedClass.params.flatMap(typesFromTypingResult).toSet + Typed(typedClass.klass)
 
   private def clazzAndItsChildrenDefinitionIfNotCollectedSoFar(typingResult: TypingResult)
                                                               (collectedSoFar: mutable.Set[TypingResult], path: DiscoveryPath)

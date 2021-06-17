@@ -2,7 +2,6 @@ package pl.touk.nussknacker.engine.types
 
 import java.lang.reflect._
 import java.util.Optional
-
 import cats.data.StateT
 import cats.effect.IO
 import org.apache.commons.lang3.{ClassUtils, StringUtils}
@@ -10,7 +9,7 @@ import pl.touk.nussknacker.engine.api.process.PropertyFromGetterExtractionStrate
 import pl.touk.nussknacker.engine.api.process.{ClassExtractionSettings, VisibleMembersPredicate}
 import pl.touk.nussknacker.engine.api.typed.typing.{Typed, TypingResult, Unknown}
 import pl.touk.nussknacker.engine.api.{Documentation, ParamName}
-import pl.touk.nussknacker.engine.definition.TypeInfos.{ClazzDefinition, MethodInfo, Parameter}
+import pl.touk.nussknacker.engine.definition.TypeInfos.{ClazzDefinition, FieldInfo, MethodInfo, Parameter}
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
 
 object EspTypeUtils {
@@ -18,15 +17,27 @@ object EspTypeUtils {
   import pl.touk.nussknacker.engine.util.Implicits._
 
   def clazzDefinition(clazz: Class[_])
-                     (implicit settings: ClassExtractionSettings): ClazzDefinition =
-    ClazzDefinition(Typed(clazz), extractPublicMethodAndFields(clazz))
-
-  private def extractPublicMethodAndFields(clazz: Class[_])
-                                          (implicit settings: ClassExtractionSettings): Map[String, List[MethodInfo]] = {
+                     (implicit settings: ClassExtractionSettings): ClazzDefinition = {
     val membersPredicate = settings.visibleMembersPredicate(clazz)
     val methods = extractPublicMethods(clazz, membersPredicate)
-    val fields = extractPublicFields(clazz, membersPredicate).mapValuesNow(List(_))
-    methods ++ fields
+
+    val fieldsFromMethods = extractDeclaredFieldsFromMethods(clazz, methods, membersPredicate)
+    val clazzFields = extractPublicFields(clazz, membersPredicate)
+    val fields = clazzFields ++ fieldsFromMethods
+
+    val filteredMethods = methods.filter(m => !fields.contains(m._1))
+
+    ClazzDefinition(Typed(clazz), fields, filteredMethods)
+  }
+
+  // We try to extract declared fields from methods
+  private def extractDeclaredFieldsFromMethods(clazz: Class[_], methods: Map[String, List[MethodInfo]], membersPredicate: VisibleMembersPredicate): Map[String, FieldInfo] = {
+    val declaredFields = getDeclaredFields(clazz, membersPredicate).map(_.getName)
+
+    methods.filter(m => declaredFields.contains(m._1)).map{case (name, methods) => {
+      val fieldMethod = methods.filter(_.parameters.isEmpty).head
+      (name , FieldInfo(fieldMethod.refClazz, fieldMethod.description))
+    }}
   }
 
   private def extractPublicMethods(clazz: Class[_], membersPredicate: VisibleMembersPredicate)
@@ -97,18 +108,26 @@ object EspTypeUtils {
     }
   }
 
-  private def extractMethod(method: Method)
-    = MethodInfo(extractParameters(method), extractMethodReturnType(method), extractNussknackerDocs(method), method.isVarArgs)
+  private def extractMethod(method: Method) =
+    MethodInfo(extractParameters(method), extractMethodReturnType(method), extractNussknackerDocs(method), method.isVarArgs)
 
   private def extractPublicFields(clazz: Class[_], membersPredicate: VisibleMembersPredicate)
-                                 (implicit settings: ClassExtractionSettings): Map[String, MethodInfo] = {
+                                 (implicit settings: ClassExtractionSettings): Map[String, FieldInfo] = {
     val interestingFields = clazz.getFields.filter(membersPredicate.shouldBeVisible)
     interestingFields.map { field =>
-      field.getName -> MethodInfo(List.empty, extractFieldReturnType(field), extractNussknackerDocs(field), varArgs = false)
+      field.getName -> FieldInfo(extractFieldReturnType(field), extractNussknackerDocs(field))
     }.toMap
   }
 
-  private def extractNussknackerDocs(accessibleObject: AccessibleObject): Option[String] = {
+  private def getDeclaredFields(clazz: Class[_], membersPredicate: VisibleMembersPredicate): List[Field] = {
+    if (clazz == classOf[Object] || clazz == null)
+      List.empty
+    else {
+      getDeclaredFields(clazz.getSuperclass, membersPredicate) ++ clazz.getDeclaredFields.filter(membersPredicate.shouldBeVisible).toList
+    }
+  }
+
+  private def extractNussknackerDocs(accessibleObject: AccessibleObject) = {
     Option(accessibleObject.getAnnotation(classOf[Documentation])).map(_.description())
   }
 
