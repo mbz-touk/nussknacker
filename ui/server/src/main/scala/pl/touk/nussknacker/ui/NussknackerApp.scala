@@ -18,7 +18,6 @@ import pl.touk.nussknacker.processCounts.influxdb.InfluxCountsReporterCreator
 import pl.touk.nussknacker.processCounts.{CountsReporter, CountsReporterCreator}
 import pl.touk.nussknacker.restmodel.validation.CustomProcessValidator
 import pl.touk.nussknacker.ui.api._
-import pl.touk.nussknacker.ui.config.processtoolbars.{ProcessAndSubprocessToolbarsConfig, ToolbarsConfigProvider}
 import pl.touk.nussknacker.ui.config.{AnalyticsConfig, ConfigWithDefaults, FeatureTogglesConfig}
 import pl.touk.nussknacker.ui.db.{DatabaseInitializer, DbConfig}
 import pl.touk.nussknacker.ui.initialization.Initialization
@@ -73,10 +72,6 @@ trait NusskanckerDefaultAppRouter extends NusskanckerAppRouter {
     val featureTogglesConfig = FeatureTogglesConfig.create(config)
     logger.info(s"Ui config loaded: \nfeatureTogglesConfig: $featureTogglesConfig")
 
-    val processAndSubprocessToolbarsConfig = ProcessAndSubprocessToolbarsConfig.create(config)
-    logger.info(s"Process and subprocess toolbars config loaded: \nprocessAndSubprocessToolbarsConfig: $processAndSubprocessToolbarsConfig")
-    val toolbarsConfigProvider = new ToolbarsConfigProvider(processAndSubprocessToolbarsConfig)
-
     val (typeToConfig, reload) = prepareProcessingTypeData(config)
 
     val analyticsConfig = AnalyticsConfig(config)
@@ -120,6 +115,7 @@ trait NusskanckerDefaultAppRouter extends NusskanckerAppRouter {
     val systemRequestTimeout = system.settings.config.getDuration("akka.http.server.request-timeout")
     val managementActor = system.actorOf(ManagementActor.props(managers, processRepository, actionRepository, subprocessResolver, processChangeListener), "management")
     val processService = new DBProcessService(managementActor, systemRequestTimeout, newProcessPreparer, processCategoryService, processResolving, dbRepositoryManager, processRepository, actionRepository, writeProcessRepository)
+    val configProcessToolbarService = new ConfigProcessToolbarService(config, processCategoryService.getAllCategories)
 
     val configProcessToolbarService = new ConfigProcessToolbarService(config, processCategoryService.getAllCategories)
 
