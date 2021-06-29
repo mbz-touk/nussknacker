@@ -211,6 +211,21 @@ Example usage:
 * `url: "/metrics/$processId" `
 * `icon: "/assets/process-icon-$processId"`
 
+#### Toolbar Panel Templating
+
+Configuration allows to templating params like: 
+* `title`
+* `tempalteHref`
+* `icon`
+
+Right now we allow to template two elements:
+* process id -`{{processId}}`
+* process name - `{{processName}}`
+
+Example usage:
+* `title: "Metrics for {{processName}}"`
+* `templateHref="/metrics/{{processId}}" `
+
 #### Default Process Panel Configuration
 
 ```
@@ -283,7 +298,7 @@ processToolbarConfig {
           { type: "test-from-file", disabled: { archived: true } }
           { type: "test-generate", disabled: { archived: true } }
           { type: "test-counts" }
-          { type: "test-hide" }
+          { type: "test-hidden" }
         ]
       }
       {
