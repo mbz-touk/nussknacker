@@ -1,6 +1,7 @@
 package pl.touk.nussknacker.ui.config
 
 import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.kafka.common.config.ConfigException
 import org.scalatest.{FlatSpec, Matchers}
 import pl.touk.nussknacker.ui.config.processtoolbar._
 

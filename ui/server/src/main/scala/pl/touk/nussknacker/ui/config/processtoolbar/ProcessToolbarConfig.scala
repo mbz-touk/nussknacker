@@ -38,7 +38,7 @@ case class ProcessToolbarsConfig(uuid: Option[UUID], topLeft: List[ToolbarPanelC
 object ProcessToolbarsConfigProvider extends LazyLogging {
   import pl.touk.nussknacker.engine.util.config.CustomFicusInstances._
   import net.ceedubs.ficus.readers.ArbitraryTypeReader._
-  import ProcessToolbarsConfig._
+  import ProcessToolbarsConfig.panelListReader
 
   private val defaultProcessToolbarConfigPath = "processToolbarConfig.defaultConfig"
   private val categoryProcessToolbarConfigPath = "processToolbarConfig.categoryConfig"
