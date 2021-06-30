@@ -19,7 +19,7 @@ export function CapabilitiesToolbarButton({deploy, change, write, disabled, hide
     return null
   }
 
-  const overridesProps = {...props, ...{disabled: disabled || hiddenByCapabilities}}
+  const overriddenProps = {...props, ...{disabled: disabled || hiddenByCapabilities}}
 
-  return <ToolbarButton {...overridesProps} />
+  return <ToolbarButton {...overriddenProps} />
 }
