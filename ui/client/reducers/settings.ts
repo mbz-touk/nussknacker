@@ -5,7 +5,6 @@ import {ProcessDefinitionData} from "../types"
 export enum AuthBackends {
   BASIC = "BasicAuth",
   OAUTH2 = "OAuth2",
-  REMOTE = "Remote",
   OTHER = "Other",
 }
 
@@ -18,13 +17,22 @@ export type SettingsState = {
   availableQueryableStates: $TodoType,
 }
 
-export type AuthenticationSettings = {
-  backend?: AuthBackends,
+export type BaseAuthenticationSettings = {
+  backend?: string
+}
+
+export type AuthenticationSettings = BaseAuthenticationSettings | RemoteAuthenticationSettings | OAuth2Settings
+
+export type RemoteAuthenticationSettings = {
+  moduleUrl?: string,
+} & BaseAuthenticationSettings
+
+export type OAuth2Settings = {
   authorizeUrl?: string,
   jwtAuthServerPublicKey?: string,
   jwtIdTokenNonceVerificationRequired?: boolean,
   implicitGrantEnabled?: boolean,
-}
+} & BaseAuthenticationSettings
 
 const initialState: SettingsState = {
   loggedUser: {},

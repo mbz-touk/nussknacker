@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext
 
 class SettingsResources(config: FeatureTogglesConfig,
                         typeToConfig: ProcessingTypeDataProvider[ProcessingTypeData],
-                        authenticationConfig: AuthenticationConfiguration,
+                        authenticationMethod: String,
                         analyticsConfig: Option[AnalyticsConfig])(implicit ec: ExecutionContext)
   extends Directives with FailFastCirceSupport with RouteWithoutUser {
 
@@ -36,11 +36,7 @@ class SettingsResources(config: FeatureTogglesConfig,
           )
 
           val authenticationSettings = AuthenticationSettings(
-            authenticationConfig.method.toString,
-            authenticationConfig.authorizeUrl.map(_.toString),
-            authenticationConfig.authSeverPublicKey.map(CertificatesAndKeys.textualRepresentationOfPublicKey),
-            authenticationConfig.idTokenNonceVerificationRequired,
-            authenticationConfig.implicitGrantEnabled
+            authenticationMethod
           )
 
           val analyticsSettings = analyticsConfig.map(a => AnalyticsSettings(a.engine.toString, a.url.toString, a.siteId))
@@ -77,11 +73,7 @@ class SettingsResources(config: FeatureTogglesConfig,
 
 @JsonCodec case class AnalyticsSettings(engine: String, url: String, siteId: String)
 
-@JsonCodec case class AuthenticationSettings(backend: String,
-                                             authorizeUrl: Option[String],
-                                             jwtAuthServerPublicKey: Option[String],
-                                             jwtIdTokenNonceVerificationRequired: Boolean,
-                                             implicitGrantEnabled: Boolean)
+@JsonCodec case class AuthenticationSettings(backend: String)
 
 @JsonCodec case class ProcessStateSettings(icons: Map[String, Map[String, String]], tooltips: Map[String, Map[String, String]])
 
