@@ -1,11 +1,10 @@
 package pl.touk.nussknacker.ui.security.oauth2
 
 import java.net.URI
-
 import io.circe.Json
 import org.scalatest.{FlatSpec, Matchers, Suite}
 import pl.touk.nussknacker.test.PatientScalaFutures
-import pl.touk.nussknacker.ui.security.api.{LoggedUser, Permission}
+import pl.touk.nussknacker.ui.security.api.{AuthenticationConfiguration, LoggedUser, Permission}
 import pl.touk.nussknacker.ui.security.oauth2.ExampleOAuth2ServiceFactory.{TestAccessTokenResponse, TestPermissionResponse, TestProfileClearanceResponse, TestProfileResponse}
 import pl.touk.nussknacker.ui.security.oauth2.OAuth2ErrorHandler.{OAuth2CompoundException, OAuth2ServerError}
 import sttp.client.Response
@@ -20,6 +19,7 @@ class ExampleOAuth2ServiceFactorySpec extends FlatSpec with Matchers with Patien
   import ExecutionContext.Implicits.global
 
   val config = ExampleOAuth2ServiceFactory.testConfig
+  val rules = ExampleOAuth2ServiceFactory.testRules
 
   def createErrorOAuth2Service(uri: URI, code: StatusCode) = {
     implicit val testingBackend = SttpBackendStub
@@ -65,18 +65,22 @@ class ExampleOAuth2ServiceFactorySpec extends FlatSpec with Matchers with Patien
     }.futureValue
   }
 
+/* These test probably test the behaviour that is not desired any more
+i.e. assigning category permissions directly by an AuthenticationProvider
+and not by a roles-to-category-permission mapping
+
   it should ("properly parse data from profile for profile Reader role") in {
     val response = TestProfileResponse(
       email = "some@email.com",
       uid = "3123123",
       clearance = TestProfileClearanceResponse(
         roles = List(TestPermissionResponse.Reader.toString),
-        portals = List("somePortal1", "somePortal2")
       )
     )
 
     val service = createDefaultServiceMock(response.asJson, config.profileUri)
-    val (user, _) = service.checkAuthorizationAndObtainUserinfo("6V1reBXblpmfjRJP").futureValue
+    val user = service.checkAuthorizationAndObtainUserinfo("6V1reBXblpmfjRJP")
+      .map { case (user, _) => LoggedUser(user, rules, List("somePortal1", "somePortal2")) }.futureValue
 
     user shouldBe a[LoggedUser]
     user.isAdmin shouldBe false
@@ -95,13 +99,13 @@ class ExampleOAuth2ServiceFactorySpec extends FlatSpec with Matchers with Patien
           TestPermissionResponse.Deployer.toString,
           TestPermissionResponse.Writer.toString,
           TestPermissionResponse.AdminTab.toString
-        ),
-        portals = List("somePortal1", "somePortal2")
+        )
       )
     )
 
     val service = createDefaultServiceMock(response.asJson, config.profileUri)
-    val (user, _) = service.checkAuthorizationAndObtainUserinfo("6V1reBXblpmfjRJP").futureValue
+    val user = service.checkAuthorizationAndObtainUserinfo("6V1reBXblpmfjRJP")
+      .map { case (user, _) => LoggedUser(user, rules, List.empty) }.futureValue
 
     user shouldBe a[LoggedUser]
     user.isAdmin shouldBe false
@@ -120,13 +124,13 @@ class ExampleOAuth2ServiceFactorySpec extends FlatSpec with Matchers with Patien
       clearance = TestProfileClearanceResponse(
         roles = List(
           TestPermissionResponse.Admin.toString
-        ),
-        portals = List("somePortal1")
+        )
       )
     )
 
     val service = createDefaultServiceMock(response.asJson, config.profileUri)
-    val (user, _) = service.checkAuthorizationAndObtainUserinfo("6V1reBXblpmfjRJP").futureValue
+    val user = service.checkAuthorizationAndObtainUserinfo("6V1reBXblpmfjRJP")
+      .map { case (user, _) => LoggedUser(user, rules, List.empty) }.futureValue
 
     user shouldBe a[LoggedUser]
     user.isAdmin shouldBe true
@@ -136,6 +140,7 @@ class ExampleOAuth2ServiceFactorySpec extends FlatSpec with Matchers with Patien
     user.can("somePortal1", Permission.Write) shouldBe true
     user.can("somePortal1", Permission.Deploy) shouldBe true
   }
+*/
 
   it should ("handling BadRequest response from profile request") in {
     val service = createErrorOAuth2Service(config.profileUri, StatusCode.BadRequest)

@@ -24,9 +24,9 @@ trait AuthenticationResources extends Directives {
 }
 
 object AuthenticationResources {
-  type LoggedUserAuth = AuthenticationDirective[LoggedUser]
+  type LoggedUserAuth = AuthenticationDirective[AuthenticatedUser]
 
-  def apply(config: Config, classLoader: ClassLoader, allCategories: List[String])(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticationResources = {
-    AuthenticationProvider(config, classLoader, allCategories).createAuthenticationResources(config, classLoader, allCategories)
+  def apply(config: Config, classLoader: ClassLoader)(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticationResources = {
+    AuthenticationProvider(config, classLoader).createAuthenticationResources(config, classLoader)
   }
 }

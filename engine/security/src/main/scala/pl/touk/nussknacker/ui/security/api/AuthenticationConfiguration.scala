@@ -21,8 +21,6 @@ trait AuthenticationConfiguration {
   val userConfig: Config = ConfigFactoryExt.parseUri(usersFile)
 
   lazy val users: List[ConfigUser] = AuthenticationConfiguration.getUsers(userConfig)
-
-  lazy val rules: List[ConfigRule] = AuthenticationConfiguration.getRules(userConfig)
 }
 
 object AuthenticationMethod extends Enumeration {
@@ -40,6 +38,7 @@ object AuthenticationConfiguration {
 
   val authenticationConfigPath = "authentication"
   val methodConfigPath = s"$authenticationConfigPath.method"
+  val usersConfigPath = s"$authenticationConfigPath.users"
   val usersConfigurationPath = "users"
   val rulesConfigurationPath = "rules"
 
@@ -47,7 +46,8 @@ object AuthenticationConfiguration {
 
   def getUsers(config: Config): List[ConfigUser] = config.as[List[ConfigUser]](usersConfigurationPath)
 
-  def getRules(config: Config): List[ConfigRule] = config.as[List[ConfigRule]](rulesConfigurationPath)
+  def getRules(usersFile: URI): List[ConfigRule] = ConfigFactoryExt.parseUri(usersFile).as[List[ConfigRule]](rulesConfigurationPath)
+  def getRules(config: Config): List[ConfigRule] = getRules(config.as[URI](usersConfigPath))
 
   case class ConfigUser(identity: String,
                         password: Option[String],

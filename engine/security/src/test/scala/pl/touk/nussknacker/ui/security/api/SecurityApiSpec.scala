@@ -74,14 +74,14 @@ private object Auth {
       extractExecutionContext.flatMap { implicit ec ⇒
         onSuccess(authenticator(cookie)).flatMap {
           case Some(user) ⇒ provide(user)
-          case None ⇒ reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("", ""))): Directive1[LoggedUser]
+          case None ⇒ reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("", ""))): Directive1[AuthenticatedUser]
         }
       }
     }
   }
-  val someAdmin = Some(LoggedUser("1", "admin", isAdmin = true))
+  val someAdmin = Some(AuthenticatedUser("1", "admin", Nil))
 
-  def authenticator(cookie: HttpCookiePair)(implicit ec: ExecutionContext): Future[Option[LoggedUser]] = {
+  def authenticator(cookie: HttpCookiePair)(implicit ec: ExecutionContext): Future[Option[AuthenticatedUser]] = {
     Future {
       cookie match {
         case HttpCookiePair(_, "Im_a_random_hash") => someAdmin
@@ -90,7 +90,7 @@ private object Auth {
     }
   }
 
-  def myUserPassAuthenticator(credentials: Credentials): Option[LoggedUser] =
+  def myUserPassAuthenticator(credentials: Credentials): Option[AuthenticatedUser] =
     credentials match {
       case p@Credentials.Provided(id) if p.verify("admin") => someAdmin
       case _ => None

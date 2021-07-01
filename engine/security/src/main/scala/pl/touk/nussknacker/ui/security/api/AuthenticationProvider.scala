@@ -12,13 +12,11 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AuthenticationProvider {
   val realm = "nussknacker"
 
-  //TODO: Extract putting allCategories in up level. Authenticator should return only Authenticated User(id, roles)
-  // mapping Authenticated User with all Categories should be do only at one place
-  def createAuthenticationResources(config: Config, classLoader: ClassLoader, allCategories: List[String])(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticationResources
+  def createAuthenticationResources(config: Config, classLoader: ClassLoader)(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticationResources
 }
 
 object AuthenticationProvider extends LazyLogging {
-  def apply(config: Config, classLoader: ClassLoader, allCategories: List[String])(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticationProvider = {
+  def apply(config: Config, classLoader: ClassLoader)(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT]): AuthenticationProvider = {
     val loaded = ScalaServiceLoader.loadClass[AuthenticationProvider](classLoader) {
       AuthenticationConfiguration.parseMethod(config) match {
         case AuthenticationMethod.OAuth2 => OAuth2AuthenticationProvider()

@@ -10,12 +10,12 @@ import io.circe.Encoder
 import io.circe.generic.JsonCodec
 import pl.touk.nussknacker.ui.security.CertificatesAndKeys
 import pl.touk.nussknacker.ui.security.api.AuthenticationResources.LoggedUserAuth
-import pl.touk.nussknacker.ui.security.api.{AuthenticationResources, LoggedUser}
+import pl.touk.nussknacker.ui.security.api.{AuthenticatedUser, AuthenticationResources, LoggedUser}
 import sttp.client.{NothingT, SttpBackend}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class OAuth2AuthenticationResources(realm: String, service: OAuth2Service[LoggedUser, OAuth2AuthorizationData], configuration: OAuth2Configuration)(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT])
+class OAuth2AuthenticationResources(realm: String, service: OAuth2Service[AuthenticatedUser, OAuth2AuthorizationData], configuration: OAuth2Configuration)(implicit ec: ExecutionContext, sttpBackend: SttpBackend[Future, Nothing, NothingT])
   extends AuthenticationResources with Directives with LazyLogging with FailFastCirceSupport {
 
   override val name: String = configuration.method.toString
