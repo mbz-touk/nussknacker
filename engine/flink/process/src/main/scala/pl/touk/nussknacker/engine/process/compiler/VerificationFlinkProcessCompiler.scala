@@ -11,7 +11,6 @@ import pl.touk.nussknacker.engine.definition.DefinitionExtractor
 import pl.touk.nussknacker.engine.flink.api.exception.FlinkEspExceptionHandler
 import pl.touk.nussknacker.engine.flink.util.source.EmptySource
 import pl.touk.nussknacker.engine.graph.EspProcess
-import pl.touk.nussknacker.engine.modelconfig.{InputConfigDuringExecution, ModelConfigLoader}
 
 class VerificationFlinkProcessCompiler(process: EspProcess,
                                        creator: ProcessConfigCreator,
