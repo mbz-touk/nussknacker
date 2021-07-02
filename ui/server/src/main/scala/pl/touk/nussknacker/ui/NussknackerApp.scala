@@ -118,8 +118,6 @@ trait NusskanckerDefaultAppRouter extends NusskanckerAppRouter {
 
     val configProcessToolbarService = new ConfigProcessToolbarService(config, processCategoryService.getAllCategories)
 
-    val configProcessToolbarService = new ConfigProcessToolbarService(config, processCategoryService.getAllCategories)
-
     val processAuthorizer = new AuthorizeProcess(processRepository)
     val appResources = new AppResources(config, reload, modelData, processRepository, processValidation, processService)
 
